@@ -1,0 +1,58 @@
+﻿@page "/hoflmulti"
+
+@using Microsoft.EntityFrameworkCore
+@using Radzen
+@using Radzen.Blazor
+@using ZakDAK.Data
+@using ZakDAK.Connection.DPE
+@using ZakDAK.Entities.DPE
+@using Serilog;
+
+<h1>Hofliste</h1>
+
+<EventConsole @ref=@console Class="mt-4" />
+
+<RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add New Order" Click="@InsertRow" Disabled=@(vorfToInsert != null) />
+<RadzenDataGrid @ref="vorfGrid" 
+    AllowFiltering="true" 
+        AllowPaging="false" PageSize="@pagesize"
+        Count="@count" LoadData="@LoadData" IsLoading=@isLoading Filter="@OnFilter"
+        AllowVirtualization="false"
+        Style="height:50vh"
+    AllowSorting="true"
+    EditMode="DataGridEditMode.Single"
+    Data="@vorf_tbl" 
+    TItem="VORF" 
+    RowUpdate="@OnUpdateRow" 
+    RowCreate="@OnCreateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="VORF" Property="vorf_nr" Title="vorf_nr" Width="120px" />
+        <RadzenDataGridColumn TItem="VORF" Property="fahr_knz" Title="fahr_knz" />
+        <RadzenDataGridColumn TItem="VORF" Property="edt" Title="edt" />
+        <RadzenDataGridColumn TItem="VORF" Property="sta" Title="sta" />
+        <RadzenDataGridColumn TItem="VORF" Context="sampleBlazorModelsSampleOrder" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="120px">
+            <Template Context="vorf">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => EditRow(vorf))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+            <EditTemplate Context="vorf">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Primary" Class="m-1" Click="@((args) => SaveRow(vorf))">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@((args) => CancelEdit(vorf))">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="VORF" Context="VORF" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px">
+            <Template Context="vorf">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small" Class="m-1" Click="@(args => DeleteRow(vorf))"  @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+            <EditTemplate Context="vorf">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small" Class="m-1" Click="@(args => DeleteRow(vorf))">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+

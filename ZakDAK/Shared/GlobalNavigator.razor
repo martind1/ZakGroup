@@ -1,0 +1,39 @@
+@using System.Text.Json
+@using Radzen
+@inject IJSRuntime JSRuntime
+@inject Services.GlobalService GNav
+<RadzenCard @attributes=@Attributes>
+    <div class="console-header align-items-center">
+        <RadzenButton Click=@OnSuchenClick Text="Suchen" ButtonStyle="ButtonStyle.Light" 
+                      class="oi oi-magnifying-glass" />
+        <RadzenButton Click=@OnRefreshClick Text="Aktualisieren" ButtonStyle="ButtonStyle.Light" 
+                      class="oi oi-reload" style="padding-left: 10px" />
+    </div>
+    <div class="console-content" id="global-navigator">
+        <div class="console-message">
+            <span class="console-message-text">@GNav.StatusText</span>
+        </div>
+    </div>
+</RadzenCard>
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object> Attributes { get; set; }
+
+    void OnSuchenClick()
+    {
+        GNav.SMess("Suchen");
+        GNav.Kommando(Services.GlobalService.KommandoTyp.Suchen);
+    }
+
+    void OnRefreshClick()
+    {
+        GNav.Kommando(Services.GlobalService.KommandoTyp.Refresh);
+    }
+
+    protected override void OnInitialized()
+    {
+        GNav.OnStatusTextChange += StateHasChanged;
+    }
+    
+}

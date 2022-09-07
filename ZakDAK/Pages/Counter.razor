@@ -1,0 +1,36 @@
+﻿@page "/counter"
+@using Serilog;
+@using Serilog.Events
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+<br/><br/>
+<RadzenButton Click="@ButtonClicked" Text=@radzenText />
+<br/>
+<RadzenTextBox @bind-Value=@radzenText />
+
+@code {
+    private int currentCount = 0;
+
+    string radzenText = "Hi";
+
+    private void IncrementCount()
+    {
+        if (Log.IsEnabled(LogEventLevel.Information))
+        {
+            Log.Information($"Counter was {@currentCount}");
+        }
+        currentCount++;
+    }
+
+    void ButtonClicked()
+    {
+        radzenText = "Hallo " + currentCount;
+    }
+}
