@@ -42,10 +42,14 @@ namespace ZakDAK.Services
         }
         #endregion
 
-        #region Statustext
+        #region Statustext, Eventconsole
         public string StatusText { get; set; } = "Statustext";
         public event Action OnStatusTextChange;
         private void StatusTextChanged() => OnStatusTextChange?.Invoke();
+
+        public bool showEventConsole { get; set; } = true;
+        public EventConsole console;
+
 
         public void SMess(String Text)
         {
@@ -62,7 +66,7 @@ namespace ZakDAK.Services
 
 
         //Statuszeile und Protlist
-        public void SMessL(String Text, EventConsole console)
+        public void SMessL(String Text)
         {
             SMess(Text);
             if (console != null)

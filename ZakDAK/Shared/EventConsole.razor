@@ -2,10 +2,11 @@
 @using Radzen
 @inject IJSRuntime JSRuntime
 <RadzenCard @attributes=@Attributes>
-    <div class="console-header align-items-center">
+@*    <div class="console-header align-items-center">
         <h3 class="console-title">Console log</h3>
         <RadzenButton Click=@OnClearClick Text="Clear console" ButtonStyle="ButtonStyle.Light" />
     </div>
+*@
     <div class="console-content" id="event-console">
     @foreach(var message in messages)
     {

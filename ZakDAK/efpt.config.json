@@ -14,6 +14,10 @@
    "SelectedToBeGenerated": 0,
    "Tables": [
       {
+         "Name": "[dbo].[ASWS]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[FLTR]",
          "ObjectType": 0
       },

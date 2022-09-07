@@ -8,6 +8,7 @@ namespace ZakDAK.Connection.DPE
 {
     public partial class DpeContext : DbContext
     {
+        public virtual DbSet<ASWS> ASWS_Tbl { get; set; }
         public virtual DbSet<FLTR> FLTR_Tbl { get; set; }
         public virtual DbSet<R_INIT> R_INIT_Tbl { get; set; }
         public virtual DbSet<VORF> VORF_Tbl { get; set; }
@@ -18,6 +19,39 @@ namespace ZakDAK.Connection.DPE
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ASWS>(entity =>
+            {
+                entity.HasKey(e => new { e.ASW_NAME, e.ITEM_POS });
+
+                entity.Property(e => e.ASW_NAME)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.BEMERKUNG)
+                    .HasMaxLength(250)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERFASST_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.ERFASST_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.GEAENDERT_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.GEAENDERT_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ITEM_DISPLAY)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ITEM_VALUE)
+                    .HasMaxLength(80)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<FLTR>(entity =>
             {
                 entity.HasKey(e => e.FLTR_ID);

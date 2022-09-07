@@ -54,6 +54,7 @@ namespace ZakDAK.Pages
             {
                 var doReload = false;
                 var column = vorfGrid.ColumnsCollection.Where(c => c.Property == "sta").FirstOrDefault();
+#pragma warning disable BL0005 // Component parameter should not be set outside of its component.
                 //if (column != null)
                 {
                     column.FilterValue = "Z";
@@ -67,6 +68,7 @@ namespace ZakDAK.Pages
                     column.FilterOperator = FilterOperator.GreaterThanOrEquals;
                     doReload = true;
                 }
+#pragma warning restore BL0005 // Component parameter should not be set outside of its component.
                 if (doReload)
                   vorfGrid.Reload();
             }
@@ -162,8 +164,7 @@ namespace ZakDAK.Pages
         #region von Sped:
         protected int count;
         protected bool isLoading = false;
-        private String oldArgs = "-1";
-        protected EventConsole console;
+        //private String oldArgs = "-1";
         protected int pagesize = 5000;  //LNav 20
 
         [Inject]
@@ -174,13 +175,13 @@ namespace ZakDAK.Pages
             isLoading = true;
             await Task.Yield();
 
-            GNav.SMessL($"Skip: {args.Skip}, Top: {args.Top}", console);
+            GNav.SMessL($"Skip: {args.Skip}, Top: {args.Top}");
             vorf_tbl = Data.FrzgQuery(args).ToList();
             // if (oldArgs != args.Filter)
             {
-                oldArgs = args.Filter;
+                //oldArgs = args.Filter;
                 count = Data.FrzgQueryCount(args);
-                GNav.SMessL($"Loaded. Count: {count}", console);
+                GNav.SMessL($"Loaded. Count: {count}");
                 //pagesize = count;
             }
 
@@ -190,7 +191,7 @@ namespace ZakDAK.Pages
 
         void OnFilter(DataGridColumnFilterEventArgs<VORF> args)
         {
-            GNav.SMessL($"Filter:{args}", console);
+            GNav.SMessL($"Filter:{args}");
         }
 
         #endregion

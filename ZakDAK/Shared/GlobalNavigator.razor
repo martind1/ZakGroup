@@ -8,6 +8,9 @@
                       class="oi oi-magnifying-glass" />
         <RadzenButton Click=@OnRefreshClick Text="Aktualisieren" ButtonStyle="ButtonStyle.Light" 
                       class="oi oi-reload" style="padding-left: 10px" />
+
+        <RadzenCheckBox @bind-Value=@GNav.showEventConsole Name="chbEventConsole" TValue="bool" Change=@(args => OnEventConsole(args, "chbEventConsole")) />
+        <RadzenLabel Text="Protokoll" Component="chbEventConsole" Style="margin-left: 8px; vertical-align: middle;" />
     </div>
     <div class="console-content" id="global-navigator">
         <div class="console-message">
@@ -15,6 +18,9 @@
         </div>
     </div>
 </RadzenCard>
+@if (GNav.showEventConsole) {
+    <EventConsole @ref=@GNav.console Class="mt-4" />
+}
 
 @code {
     [Parameter(CaptureUnmatchedValues = true)]
@@ -33,7 +39,13 @@
 
     protected override void OnInitialized()
     {
-        GNav.OnStatusTextChange += StateHasChanged;
+        GNav.OnStatusTextChange += StateHasChanged;  //build-in:Refresh
+    }
+
+    void OnEventConsole(bool value, string name)
+    {
+        GNav.showEventConsole = value;
+        GNav.SMess($"{name} value changed to {value}");
     }
     
 }
