@@ -1,7 +1,7 @@
 @using System.Text.Json
 @using Radzen
 @inject IJSRuntime JSRuntime
-@inject Services.GlobalService GNav
+@inject Kmp.GlobalService GNav
 <RadzenCard @attributes=@Attributes>
     <div class="console-header align-items-center">
         <RadzenButton Click=@OnSuchenClick Text="Suchen" ButtonStyle="ButtonStyle.Light" 
@@ -29,12 +29,12 @@
     void OnSuchenClick()
     {
         GNav.SMess("Suchen");
-        GNav.Kommando(Services.GlobalService.KommandoTyp.Suchen);
+        GNav.Kommando(Kmp.GlobalService.KommandoTyp.Suchen);
     }
 
     void OnRefreshClick()
     {
-        GNav.Kommando(Services.GlobalService.KommandoTyp.Refresh);
+        GNav.Kommando(Kmp.GlobalService.KommandoTyp.Refresh);
     }
 
     protected override void OnInitialized()

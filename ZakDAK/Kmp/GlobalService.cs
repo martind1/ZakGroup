@@ -3,7 +3,7 @@ using Radzen.Blazor;
 using System.Text.Json;
 using ZakDAK.Shared;
 
-namespace ZakDAK.Services
+namespace ZakDAK.Kmp
 {
     /// <summary>
     /// Service für globale Navigation
