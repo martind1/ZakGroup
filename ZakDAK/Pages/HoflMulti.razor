@@ -1,4 +1,4 @@
-﻿@page "/hoflmulti"
+﻿@page "/hofliste/{Abfrage}"
 
 @using Microsoft.EntityFrameworkCore
 @using Radzen
@@ -12,11 +12,12 @@
 
 <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add New Order" Click="@InsertRow" Disabled=@(vorfToInsert != null) />
 <RadzenDataGrid @ref="vorfGrid" 
-    AllowFiltering="true" 
+        AllowFiltering="false" 
         AllowPaging="false" PageSize="@pagesize"
-        Count="@count" LoadData="@LoadData" IsLoading=@isLoading Filter="@OnFilter"
+        Count="@count" LoadData="@LoadData" IsLoading=@isLoading 
         AllowVirtualization="false"
         Style="height:50vh"
+        SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selectedVORF
     AllowSorting="true"
     EditMode="DataGridEditMode.Single"
     Data="@vorf_tbl" 
@@ -24,10 +25,10 @@
     RowUpdate="@OnUpdateRow" 
     RowCreate="@OnCreateRow">
     <Columns>
-        <RadzenDataGridColumn TItem="VORF" Property="vorf_nr" Title="vorf_nr" Width="120px" />
-        <RadzenDataGridColumn TItem="VORF" Property="fahr_knz" Title="fahr_knz" />
-        <RadzenDataGridColumn TItem="VORF" Property="edt" Title="edt" SortOrder="SortOrder.Descending" />
-        <RadzenDataGridColumn TItem="VORF" Property="sta" Title="sta" />
+        @foreach (var col in lnav.Columnlist.Columns)
+        {
+            <RadzenDataGridColumn TItem="VORF" Property="@col.Key" Title="@col.Value.DisplayLabel" Width="@col.Value.WidthPx" />
+        }
         <RadzenDataGridColumn TItem="VORF" Context="sampleBlazorModelsSampleOrder" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="120px">
             <Template Context="vorf">
                 <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => EditRow(vorf))" @onclick:stopPropagation="true">

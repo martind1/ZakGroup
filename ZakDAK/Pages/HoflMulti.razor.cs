@@ -29,8 +29,23 @@ namespace ZakDAK.Pages
     {
         RadzenDataGrid<VORF> vorfGrid;
         IList<VORF> vorf_tbl;
-        //IEnumerable<Customer> customers;
-        //IEnumerable<Employee> employees;
+        IList<VORF> selectedVORF;
+        LocalService<VORF> lnav;
+
+        [Parameter]
+        public string Abfrage { get; set; } = "Standard";
+        public string formKurz = "HTML";
+
+        [Inject]
+        private GlobalService GNav { get; set; }
+        [Inject]
+        private ProtService Prot { get; set; }
+
+        public HoflMulti()
+        {
+            //GNav ist hier noch null!
+            //vorfGrid ist hier noch null!
+        }
 
         [Inject]
         DpeData Data { get; set; }
@@ -38,15 +53,12 @@ namespace ZakDAK.Pages
         protected override void OnInitialized()
         {
             base.OnInitialized();
-            //customers = dbContext.Customers.ToList();
-            //employees = dbContext.Employees.ToList();
-            // For demo purposes only
-            //orders = dbContext.Orders.Include("Customer").Include("Employee").ToList();
-            // For production
-            //orders = dbContext.Orders.Include("Customer").Include("Employee");
-            //loaddata - vorf_tbl = Data.FrzgQuery(null).ToList();
+            lnav = new LocalService<VORF>(vorfGrid, formKurz, Abfrage);
             GNav.SetGrid<VORF>(vorfGrid);
+            Prot.SMessL($"Init. Abfrage={Abfrage}");
         }
+
+#region Demo Inline Insert, Edit, Delete
 
         protected override Task OnAfterRenderAsync(bool firstRender)
         {
@@ -87,7 +99,7 @@ namespace ZakDAK.Pages
                 vorfToInsert = null;
             }
 
-            Data.FrzgUpdate(vorf);
+            Data.VorfUpdate(vorf);
             // For demo purposes only
             //vorf.Customer = dbContext.Customers.Find(vorf.CustomerID);
             //vorf.Employee = dbContext.Employees.Find(vorf.EmployeeID);
@@ -114,7 +126,7 @@ namespace ZakDAK.Pages
 
             vorfGrid.CancelEditRow(vorf);
             // For production
-            var vorfEntry = Data.FrzgEntry(vorf);
+            var vorfEntry = Data.VorfEntry(vorf);
             if (vorfEntry.State == EntityState.Modified)
             {
                 vorfEntry.CurrentValues.SetValues(vorfEntry.OriginalValues);
@@ -131,7 +143,7 @@ namespace ZakDAK.Pages
 
             if (vorf_tbl.Contains(vorf))
             {
-                Data.FrzgRemove(vorf);
+                Data.VorfRemove(vorf);
                 // For demo purposes only
                 vorf_tbl.Remove(vorf);
                 // For production
@@ -153,47 +165,37 @@ namespace ZakDAK.Pages
 
         void OnCreateRow(VORF vorf)
         {
-            Data.FrzgAdd(vorf);
+            Data.VorfAdd(vorf);
             // For demo purposes only
             //vorf.Customer = dbContext.Customers.Find(vorf.CustomerID);
             //vorf.Employee = dbContext.Employees.Find(vorf.EmployeeID);
             // For production
             //dbContext.SaveChanges();
         }
+#endregion
 
-        #region von Sped:
+#region von Sped:
         protected int count;
         protected bool isLoading = false;
-        //private String oldArgs = "-1";
-        protected int pagesize = 5000;  //LNav 20
-
-        [Inject]
-        private GlobalService GNav { get; set; }
+        protected int pagesize;  //LNav bzw GNax MaxRecordCount
 
         protected async Task LoadData(LoadDataArgs args)
         {
             isLoading = true;
             await Task.Yield();
 
-            GNav.SMessL($"Skip: {args.Skip}, Top: {args.Top}");
-            vorf_tbl = Data.FrzgQuery(args).ToList();
-            // if (oldArgs != args.Filter)
-            {
-                //oldArgs = args.Filter;
-                count = Data.FrzgQueryCount(args);
-                GNav.SMessL($"Loaded. Count: {count}");
-                //pagesize = count;
-            }
+            pagesize = GNav.MaxRecordCount;
+            Prot.SMessL($"Skip: {args.Skip}, Top: {args.Top}, pagesize={pagesize}");
+            vorf_tbl = Data.VorfQuery(args).ToList();
+            count = Data.VorfQueryCount(args);
+            Prot.SMessL($"Loaded. Count: {count}");
+            //pagesize = count;
 
-            //if (args.Top > 20)
+            //vorf_tbl = lnav.queryList();
+
             isLoading = false;
         }
 
-        void OnFilter(DataGridColumnFilterEventArgs<VORF> args)
-        {
-            GNav.SMessL($"Filter:{args}");
-        }
-
-        #endregion
+#endregion
     }
 }

@@ -82,7 +82,7 @@ namespace ZakDAK.Data
         
         #region Vorf
 
-        public IQueryable<VORF> FrzgQuery(Query query)
+        public IQueryable<VORF> VorfQuery(Query query)
         {
             var items = Ctx.VORF_Tbl.AsQueryable();
             if (query != null)
@@ -93,13 +93,13 @@ namespace ZakDAK.Data
             return items;
         }
 
-        public IQueryable<VORF> FrzgQuery(LoadDataArgs args)
+        public IQueryable<VORF> VorfQuery(LoadDataArgs args)
         {
             var query = QueryFromLoadDataArgs(args);
-            return FrzgQuery(query);
+            return VorfQuery(query);
         }
 
-        public int FrzgQueryCount(Query query)
+        public int VorfQueryCount(Query query)
         {
             var items = Ctx.VORF_Tbl.AsQueryable();
             //items = items.Include(i => i.Contact);
@@ -113,31 +113,31 @@ namespace ZakDAK.Data
             return items.Count();
         }
 
-        public int FrzgQueryCount(LoadDataArgs args)
+        public int VorfQueryCount(LoadDataArgs args)
         {
             var query = QueryFromLoadDataArgs(args);
-            return FrzgQueryCount(query);
+            return VorfQueryCount(query);
         }
 
 
-        public void FrzgUpdate(VORF frzg)
+        public void VorfUpdate(VORF frzg)
         {
             Ctx.Update<VORF>(frzg);
             Ctx.SaveChanges();
         }
 
-        public EntityEntry<VORF> FrzgEntry(VORF frzg)
+        public EntityEntry<VORF> VorfEntry(VORF frzg)
         {
             return Ctx.Entry<VORF>(frzg);
         }
 
-        public void FrzgRemove(VORF frzg)
+        public void VorfRemove(VORF frzg)
         {
             Ctx.Remove<VORF>(frzg);
             Ctx.SaveChanges();
         }
 
-        public void FrzgAdd(VORF frzg)
+        public void VorfAdd(VORF frzg)
         {
             Ctx.Add<VORF>(frzg);
             Ctx.SaveChanges();

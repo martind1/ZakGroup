@@ -40,6 +40,7 @@ try
     builder.Logging.AddSerilog();
     //md Utils:
     builder.Services.AddScoped<GlobalService>();
+    builder.Services.AddScoped<ProtService>();
 
     //md ab .NET 6 kein Startup.cs mehr notwendig!
 

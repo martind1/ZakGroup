@@ -10,7 +10,7 @@ namespace ZakDAK.Kmp
     /// </summary>
     public class GlobalService : ComponentBase
     {
-        #region Kommando, Status
+#region Kommando, Status
         public enum KommandoTyp
         {
             Suchen, Refresh
@@ -27,9 +27,9 @@ namespace ZakDAK.Kmp
             Inactive, Browse, Edit, Insert, Query
         }
 
-        #endregion
+#endregion
 
-        #region Grid, NavLink
+#region Grid, NavLink
         //wird nicht benötigt. Jetzt per Kommando Event
         //später: navLink. Ziel: in Page-File: Navlink nl = new NavLink('SPED'), Data von JSON-DB/R_INIT
         public RadzenDataGrid<Object> Grid = null;
@@ -42,38 +42,19 @@ namespace ZakDAK.Kmp
         }
         #endregion
 
-        #region Statustext, Eventconsole
-        public string StatusText { get; set; } = "Statustext";
-        public event Action OnStatusTextChange;
-        private void StatusTextChanged() => OnStatusTextChange?.Invoke();
+#region Statustext, Eventconsole
+        public bool ShowEventConsole { get; set; } = true;
+        #endregion
 
-        public bool showEventConsole { get; set; } = true;
-        public EventConsole console;
-
-
-        public void SMess(String Text)
+        #region pagesize
+        public int MaxRecordCount { get; set; } = 5000;
+        public IDictionary<string, int> MaxRecordCountValues = new Dictionary<string, int>()
         {
-            StatusText = Text;
-            //Ereignis zum Anzeigen woanders auslösen:
-            StatusTextChanged();
-        }
-
-        //Statuszeile mit Object->JSON
-        public void SMess(object value)
-        {
-            SMess(JsonSerializer.Serialize(value));
-        }
-
-
-        //Statuszeile und Protlist
-        public void SMessL(String Text)
-        {
-            SMess(Text);
-            if (console != null)
-                console.Log(Text);
-        }
-
-        //Logfile und Statuszeile
+            {"50", 50 },
+            {"500", 500 },
+            {"5000", 5000 },
+            {"(alle)", 99999999 }
+        };
 
         #endregion
 

@@ -2,6 +2,7 @@
 @using Radzen
 @inject IJSRuntime JSRuntime
 @inject Kmp.GlobalService GNav
+@inject Kmp.ProtService Prot
 <RadzenCard @attributes=@Attributes>
     <div class="console-header align-items-center">
         <RadzenButton Click=@OnSuchenClick Text="Suchen" ButtonStyle="ButtonStyle.Light" 
@@ -9,17 +10,22 @@
         <RadzenButton Click=@OnRefreshClick Text="Aktualisieren" ButtonStyle="ButtonStyle.Light" 
                       class="oi oi-reload" style="padding-left: 10px" />
 
-        <RadzenCheckBox @bind-Value=@GNav.showEventConsole Name="chbEventConsole" TValue="bool" Change=@(args => OnEventConsole(args, "chbEventConsole")) />
+        <RadzenCheckBox @bind-Value=@GNav.ShowEventConsole Name="chbEventConsole" TValue="bool" Change=@(args => OnEventConsole(args, "chbEventConsole")) />
         <RadzenLabel Text="Protokoll" Component="chbEventConsole" Style="margin-left: 8px; vertical-align: middle;" />
+
+        <RadzenDropDown AllowClear="false" TValue="string" Name="cobPageSize"
+                        Data=@GNav.MaxRecordCountValues.Keys.ToList() Value=@GNav.MaxRecordCount.ToString()
+                        Change=@(args => OnPageSizeChange(args, "DropDown")) />
+        <RadzenLabel Text="Zeilen" Component="cobPageSize" Style="margin-left: 8px; vertical-align: middle;" />
     </div>
     <div class="console-content" id="global-navigator">
         <div class="console-message">
-            <span class="console-message-text">@GNav.StatusText</span>
+            <span class="console-message-text">@Prot.StatusText</span>
         </div>
     </div>
 </RadzenCard>
-@if (GNav.showEventConsole) {
-    <EventConsole @ref=@GNav.console Class="mt-4" />
+@if (GNav.ShowEventConsole) {
+    <EventConsole @ref=@Prot.console Class="mt-4" />
 }
 
 @code {
@@ -28,7 +34,7 @@
 
     void OnSuchenClick()
     {
-        GNav.SMess("Suchen");
+        Prot.SMess("Suchen");
         GNav.Kommando(Kmp.GlobalService.KommandoTyp.Suchen);
     }
 
@@ -39,13 +45,18 @@
 
     protected override void OnInitialized()
     {
-        GNav.OnStatusTextChange += StateHasChanged;  //build-in:Refresh
+        Prot.OnStatusTextChange += StateHasChanged;  //build-in:Refresh
     }
 
     void OnEventConsole(bool value, string name)
     {
-        GNav.showEventConsole = value;
-        GNav.SMess($"{name} value changed to {value}");
+        GNav.ShowEventConsole = value;
+        Prot.SMess($"{name} value changed to {value}");
+    }
+
+    void OnPageSizeChange(object value, string name)
+    {
+        GNav.MaxRecordCount = GNav.MaxRecordCountValues[value.ToString()];
     }
     
 }

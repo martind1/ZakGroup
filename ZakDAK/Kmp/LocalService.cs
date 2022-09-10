@@ -1,97 +1,68 @@
 ﻿using NuGet.Protocol;
+using Radzen.Blazor;
 using System.Security.Policy;
+using ZakDAK.Entities.DPE;
 
 namespace ZakDAK.Kmp
 {
-    [Flags]
-    public enum ColumnListItemFlags
-    {
-        Speicherwert = 1, //S=Auswahlfeld: Speicherwert (statt Anzeigewert) anzeigen
-        Summe = 2,        //M=Spalte summieren
-        OptiBreite = 4,   //O=Optimale Breite 
-        MaxBreite = 8,    //X=Maximale Breite (in letzter Spalte)
-        Hilfetext = 16,   //H=vollständigen Text in Statuszeile anzeigen
 
-    }
-
-    // Beschreibung einer Spalte
-    public class ColumnListItem
-    {
-        public string DisplayLabel { get; set; }
-        public int DisplayWidth { get; set; } = 0;
-        public bool IsVisible
-        {
-            get => DisplayWidth > 0;
-            set
-            {
-                if (value)
-                {
-                    if (DisplayWidth == 0)
-                        DisplayWidth = 8;
-                }
-                else
-                {
-                    if (DisplayWidth > 0)
-                        DisplayWidth = 0;
-                }
-            }
-        }
-        public ColumnListItemFlags Flags { get; set; }
-
-        //Spalte anhand KMP Beschreibung anlegen idF <Display>:<Width>,<[Option]*>
-        public ColumnListItem(string ColDesc)
-        {
-            var SL1 = ColDesc.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            if (SL1.Length >= 1)
-            { 
-                var SL2 = SL1[0].Split(':');
-                DisplayLabel = SL2[0];
-                if (SL2.Length >= 2)
-                    DisplayWidth = int.Parse(SL2[1]);
-                foreach (var option in SL1[1..])
-                {
-                    ColumnListItemFlags flags = option switch
-                    {
-                        "S" => ColumnListItemFlags.Speicherwert,
-                        "M" => ColumnListItemFlags.Summe,
-                        "O" => ColumnListItemFlags.OptiBreite,
-                        "X" => ColumnListItemFlags.MaxBreite,
-                        "H" => ColumnListItemFlags.Hilfetext,
-                        _ => throw new NotImplementedException()
-                    };
-                    Flags |= flags;
-                }
-            }
-        }
-    }
-
-    public class ColumnList
-    {
-        //idF <ColDesc>=<FieldName>
-        public IDictionary<string, ColumnListItem> Columns { get; set; }
-
-        public ColumnList()
-        {
-            Columns = new Dictionary<string, ColumnListItem>();
-        }
-
-        public ColumnList(string columnlist) : base()   
-        {
-            List<string> list = new(
-                columnlist.Split(new string[] { "\r\n", "\n", "\r" },
-                StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-            foreach (var s in list)
-            {
-                var SL = s.Split("=");
-                Columns.Add(SL[0], new ColumnListItem(SL[1]));
-            }
-        }
-    }
-
+    //Der lokale Navigator
     public class LocalService<TItem>
     {
+        //todo: nach NLnk - NavigatorLink - LinkService
+        public ColumnList Columnlist { get; set; }
+        public FltrList Fltrlist { get; set; }
+        public FltrList References { get; set; }  //nicht durch User änderbar
+        public string abfrage = "";
+        public string formKurz = "";
+
+        RadzenDataGrid<TItem> grid;
+
         public LocalService()
         {
+            
         }
+
+        public LocalService(RadzenDataGrid<TItem> grid, string formKurz, string abfrage): this()
+        {
+            this.grid = grid;
+            this.formKurz = formKurz;
+            this.abfrage = abfrage;
+
+            Columnlist = GetColumnlist();
+        }
+
+#region ColumnList, References
+
+        public ColumnList GetColumnlist()
+        {
+            //Test: statische Liste
+            //Später: LookUp FLTR[formKurz, abfrage].ColumnList
+            string cl =
+@"Quittung:5=HOFL_KTRL
+sta:0=sta
+edt:0=edt
+Lieferart:10=lityp
+EIN:5=ETm
+Fahrzeug:11=fahr_knz
+Beförderer:23=anl_na1
+Sorte Bez.:21=srte_bez
+Tara:8=tagew
+erz_na1:13=erz_na1
+erz_na2:14=erz_na2
+erz_str:15=erz_str";
+            return new ColumnList(cl);
+        }
+
+        #endregion
+
+        //Idee: hier auch individueller MaxRecordCount
+
+#region FltrList und References
+
+
+
+#endregion
+
     }
 }
