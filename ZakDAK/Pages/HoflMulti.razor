@@ -1,4 +1,5 @@
-﻿@page "/hofliste/{Abfrage}"
+﻿@page "/hofliste"
+@page "/hofliste/{Abfrage}"
 
 @using Microsoft.EntityFrameworkCore
 @using Radzen
@@ -7,18 +8,19 @@
 @using ZakDAK.Connection.DPE
 @using ZakDAK.Entities.DPE
 @using Serilog;
+@using Utils;
 
 <h1>Hofliste</h1>
-
+<BlazorTimer Seconds="@PollSeconds" Callback="Poll"></BlazorTimer>
 <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add New Order" Click="@InsertRow" Disabled=@(vorfToInsert != null) />
 <RadzenDataGrid @ref="vorfGrid" 
         AllowFiltering="false" 
         AllowPaging="false" PageSize="@pagesize"
         Count="@count" LoadData="@LoadData" IsLoading=@isLoading 
         AllowVirtualization="false"
-        Style="height:50vh"
+                Style="height:50vh; "
         SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selectedVORF
-    AllowSorting="true"
+        AllowSorting="true"  AllowMultiColumnSorting="true" ShowMultiColumnSortingIndex="true" Sort="@OnSort"
     EditMode="DataGridEditMode.Single"
     Data="@vorf_tbl" 
     TItem="VORF" 
@@ -27,7 +29,8 @@
     <Columns>
         @foreach (var col in lnav.Columnlist.Columns)
         {
-            <RadzenDataGridColumn TItem="VORF" Property="@col.Key" Title="@col.Value.DisplayLabel" Width="@col.Value.WidthPx" />
+            <RadzenDataGridColumn TItem="VORF" Property="@col.Key" Title="@col.Value.DisplayLabel" Width="@col.Value.WidthPx" Visible="@col.Value.IsVisible"
+                              SortOrder="@col.Value.SortOrder" />
         }
         <RadzenDataGridColumn TItem="VORF" Context="sampleBlazorModelsSampleOrder" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="120px">
             <Template Context="vorf">

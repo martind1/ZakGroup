@@ -6,9 +6,9 @@
 <RadzenCard @attributes=@Attributes>
     <div class="console-header align-items-center">
         <RadzenButton Click=@OnSuchenClick Text="Suchen" ButtonStyle="ButtonStyle.Light" 
-                      class="oi oi-magnifying-glass" />
+                        class="oi oi-magnifying-glass" />
         <RadzenButton Click=@OnRefreshClick Text="Aktualisieren" ButtonStyle="ButtonStyle.Light" 
-                      class="oi oi-reload" style="padding-left: 10px" />
+                        class="oi oi-reload" style="padding-left: 10px" />
 
         <RadzenCheckBox @bind-Value=@GNav.ShowEventConsole Name="chbEventConsole" TValue="bool" Change=@(args => OnEventConsole(args, "chbEventConsole")) />
         <RadzenLabel Text="Protokoll" Component="chbEventConsole" Style="margin-left: 8px; vertical-align: middle;" />

@@ -38,9 +38,16 @@ namespace ZakDAK.Kmp
             SMess(Text);
             if (console != null)
                 console.Log(Text);
+            else
+                Debug0();
         }
 
         //Logfile und Statuszeile
+
+        public void Debug0()
+        {
+            //macht nix. Nur für Brakpoint
+        }
 
 #endregion
 

@@ -13,7 +13,7 @@ namespace ZakDAK.Kmp
 #region Kommando, Status
         public enum KommandoTyp
         {
-            Suchen, Refresh
+            Suchen, Refresh, Pagesize
         }
         public event Action<int> OnDoKommando;
         private void DoKommando(int KNr) => OnDoKommando?.Invoke(KNr);
@@ -32,13 +32,13 @@ namespace ZakDAK.Kmp
 #region Grid, NavLink
         //wird nicht benötigt. Jetzt per Kommando Event
         //später: navLink. Ziel: in Page-File: Navlink nl = new NavLink('SPED'), Data von JSON-DB/R_INIT
-        public RadzenDataGrid<Object> Grid = null;
-        //private Type? EntityType = null;
 
-        public void SetGrid<T>(Object g)
+        public LocalService<Object> lnav;
+
+        public void SetLNav<T>(Object ln)
         {
             //EntityType = typeof(T);
-            Grid = (RadzenDataGrid<Object>)g;
+            lnav = (LocalService<Object>)ln;
         }
         #endregion
 
@@ -47,7 +47,11 @@ namespace ZakDAK.Kmp
         #endregion
 
         #region pagesize
-        public int MaxRecordCount { get; set; } = 5000;
+        private int _maxRecordCount = 50;
+        public int MaxRecordCount { 
+            get => _maxRecordCount; 
+            set { _maxRecordCount = value; Kommando(Kmp.GlobalService.KommandoTyp.Pagesize); }
+        }
         public IDictionary<string, int> MaxRecordCountValues = new Dictionary<string, int>()
         {
             {"50", 50 },

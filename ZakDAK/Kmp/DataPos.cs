@@ -54,7 +54,7 @@ namespace ZakDAK.Kmp
     {
         public string DisplayLabel { get; set; }
         public int DisplayWidth { get; set; } = 0;
-        public string WidthPx { get { int dw8 = DisplayWidth * 8; return $"{dw8}px"; } }
+        public string WidthPx { get { int dw8 = DisplayWidth * 8 + 16; return $"{dw8}px"; } }
         public bool IsVisible
         {
             get => DisplayWidth > 0;
@@ -73,6 +73,9 @@ namespace ZakDAK.Kmp
             }
         }
         public ColumnListItemFlags Flags { get; set; }
+        //wird nachträglich ausgefüllt: (asc, desc, ""/null) für razor
+        public Radzen.SortOrder? SortOrder { get; set; }
+
 
         //Spalte anhand KMP Beschreibung anlegen idF <Display>:<Width>,<[Option]*>
         public ColumnListItem(string ColDesc)
@@ -143,21 +146,29 @@ namespace ZakDAK.Kmp
 
 
     // Beschreibung Suchkriterien eines Felds
-    // Kmp (Kmp.Fltrlist): a >a <a == >= a;b;c [raw Feld-Argument] {raw Zeile ohne Feld}
+    // KmpStr (von Kmp.Fltrlist.Zeile): a >a <a == >= a;b;c [raw Feld-Argument] {raw Zeile ohne Feld}
     // Where (für Linq): <FldName> = "a" oder <FldName> > b
     // OrFlag (Kmp beginnt mit ';'): true = Verknüpfung mit 'or' mit anderen Feldern (und entspr Klammerung)
     public class FltrListItem
     {
-        public string Kmp { get; set; }
+        public string KmpStr { get; set; }
         public string Where { get; set; }
         public bool OrFlag { get; set; } = false;
 
         //Item anhand KMP Beschreibung anlegen. Noch kein Where/SQL
-        public FltrListItem(string kmp)
+        public FltrListItem(string kmpstr)
         {
-            Kmp = kmp;
+            KmpStr = kmpstr;
         }
     }
-#endregion
+    #endregion
+
+    #region Formatlist
+
+    // Aufbau: <Fieldname>=<Format> # Format = [r,][R,]
+    // todo:machen
+
+    #endregion
+
 
 }

@@ -7,6 +7,8 @@ namespace ZakDAK.Entities.DPE
     public partial class FLTR
     {
         //berechnete Eigenschaften
-        public ColumnList columnlist { get => new(COLUMNLIST); }
+        public ColumnList Columnlist { get => new(COLUMNLIST); }
+
+        public FltrList Fltrlist { get => new(FLTRLIST); }
     }
 }

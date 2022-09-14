@@ -10,6 +10,7 @@ using Microsoft.JSInterop;
 using Radzen;
 using Radzen.Blazor;
 using Serilog;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,6 @@ using ZakDAK.Data;
 using ZakDAK.Entities.DPE;
 using ZakDAK.Kmp;
 using ZakDAK.Shared;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ZakDAK.Pages
 {
@@ -32,9 +32,11 @@ namespace ZakDAK.Pages
         IList<VORF> selectedVORF;
         LocalService<VORF> lnav;
 
+        //private string _abfrage = "Standard";
         [Parameter]
+        //public string Abfrage { get => String.IsNullOrEmpty(_abfrage) ? "Standard" : _abfrage; set => _abfrage = value; }
         public string Abfrage { get; set; } = "Standard";
-        public string formKurz = "HTML";
+        public string formKurz = "HTTP";
 
         [Inject]
         private GlobalService GNav { get; set; }
@@ -53,36 +55,53 @@ namespace ZakDAK.Pages
         protected override void OnInitialized()
         {
             base.OnInitialized();
-            lnav = new LocalService<VORF>(vorfGrid, formKurz, Abfrage);
-            GNav.SetGrid<VORF>(vorfGrid);
-            Prot.SMessL($"Init. Abfrage={Abfrage}");
+            GNav.OnDoKommando += RunKommando;
+            pagesize = GNav.MaxRecordCount;
+            //Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier noch keine console!
         }
 
-#region Demo Inline Insert, Edit, Delete
+        protected override void OnParametersSet()
+        {
+            lnav = new LocalService<VORF>(vorfGrid, Data, formKurz, Abfrage)
+            {
+                References = new FltrList("lityp=<>X\r\nsta=H")
+            };
+        }
+
+        #region Konfiguration
+
+        public int PollSeconds { get; set; } = 120;
+
+        #endregion
+
+        #region Demo Inline Insert, Edit, Delete
 
         protected override Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
             {
-                var doReload = false;
-                var column = vorfGrid.ColumnsCollection.Where(c => c.Property == "sta").FirstOrDefault();
-#pragma warning disable BL0005 // Component parameter should not be set outside of its component.
-                //if (column != null)
-                {
-                    column.FilterValue = "Z";
-                    column.FilterOperator = FilterOperator.NotEquals;
-                    doReload = true;
-                }
-                column = vorfGrid.ColumnsCollection.Where(c => c.Property == "edt").FirstOrDefault();
-                //if (column != null)
-                {
-                    column.FilterValue = new DateTime(2018, 1, 1);
-                    column.FilterOperator = FilterOperator.GreaterThanOrEquals;
-                    doReload = true;
-                }
-#pragma warning restore BL0005 // Component parameter should not be set outside of its component.
-                if (doReload)
-                  vorfGrid.Reload();
+                Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier noch keine console!
+
+                //12.09.22 Filter jetzt per LNav
+//                var doReload = false;
+//                var column = vorfGrid.ColumnsCollection.Where(c => c.Property == "sta").FirstOrDefault();
+//#pragma warning disable BL0005 // Component parameter should not be set outside of its component.
+//                //if (column != null)
+//                {
+//                    column.FilterValue = "Z";
+//                    column.FilterOperator = FilterOperator.NotEquals;
+//                    doReload = true;
+//                }
+//                column = vorfGrid.ColumnsCollection.Where(c => c.Property == "edt").FirstOrDefault();
+//                //if (column != null)
+//                {
+//                    column.FilterValue = new DateTime(2018, 1, 1);
+//                    column.FilterOperator = FilterOperator.GreaterThanOrEquals;
+//                    doReload = true;
+//                }
+//#pragma warning restore BL0005 // Component parameter should not be set outside of its component.
+//                if (doReload)
+//                  vorfGrid.Reload();
             }
             return base.OnAfterRenderAsync(firstRender);
         }
@@ -184,18 +203,87 @@ namespace ZakDAK.Pages
             isLoading = true;
             await Task.Yield();
 
+            //pagesize anpassen falls in GNav/LNav geändert
             pagesize = GNav.MaxRecordCount;
-            Prot.SMessL($"Skip: {args.Skip}, Top: {args.Top}, pagesize={pagesize}");
-            vorf_tbl = Data.VorfQuery(args).ToList();
-            count = Data.VorfQueryCount(args);
-            Prot.SMessL($"Loaded. Count: {count}");
-            //pagesize = count;
+            if (args.Skip == 0 && args.Top != pagesize)
+            {
+                Prot.SMessL($"Top: {args.Top} => {pagesize}");
+                args.Top = pagesize;
+            }
+            //merken für später
+            lnav.OrderBy = args.OrderBy;
 
-            //vorf_tbl = lnav.queryList();
+            Prot.SMessL($"Skip: {args.Skip}, Top: {args.Top}, pagesize={pagesize}");
+
+            args.Filter = lnav.GetFilter();  //SQL generieren
+            vorf_tbl = Data.VorfQuery(args).ToList();
+            //Idee ohne Data Service: vorf_tbl = lnav.queryList();
+            count = Data.VorfQueryCount(args);
+
+            Prot.SMessL($"Loaded. Count: {count}");
+
+
 
             isLoading = false;
         }
 
-#endregion
+        #endregion
+
+        #region Kommando von GlobalNavigator über GlobalService nach hier
+
+        public void RunKommando(int KNr)
+        {
+            switch ((GlobalService.KommandoTyp)KNr)
+            {
+                case GlobalService.KommandoTyp.Suchen:
+                    {
+                        //SuchenDialog
+                        //if (allowFiltering)
+                        //    _ = InsertRow();
+                        StateHasChanged();
+                        break;
+                    }
+                case GlobalService.KommandoTyp.Refresh:
+                    {
+                        _ = Reset();
+                        break;
+                    }
+                case GlobalService.KommandoTyp.Pagesize:
+                    {
+                        pagesize = GNav.MaxRecordCount;
+                        _ = Reset();
+                        break;
+                    }
+            }
+        }
+
+        async Task Reset()
+        {
+            //grid.Reset(true);
+            await vorfGrid.Reload();
+            //await grid.FirstPage(true);
+        }
+
+        #endregion
+
+        void OnSort(DataGridColumnSortEventArgs<VORF> args)
+        {
+            //
+            //bringt EAccess string json = JsonConvert.SerializeObject(args);
+            //bringt auch EAccess string json = System.Text.Json.JsonSerializer.Serialize(args);
+            Prot.SMessL($"OnSort:{args.Column.Property} {args.SortOrder}");
+            var colList = vorfGrid.ColumnsCollection.Where(c => c.SortOrder != null);
+            foreach (var col in colList)
+            {
+                Prot.SMessL($"SortColumn Fld:{col.Property} SortProp:{col.SortProperty} a/d:{col.SortOrder}");
+
+            }
+        }
+
+        void Poll()
+        {
+            _ = Reset();
+        }
+
     }
 }

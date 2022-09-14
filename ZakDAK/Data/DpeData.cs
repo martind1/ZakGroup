@@ -6,6 +6,8 @@ using System.Data.Entity;
 using System.Linq.Dynamic.Core;
 using ZakDAK.Connection.DPE;
 using ZakDAK.Entities.DPE;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Query = Radzen.Query;
 
 namespace ZakDAK.Data
 {
@@ -28,6 +30,7 @@ namespace ZakDAK.Data
         {
             if (query != null)
             {
+                // Relationen laden (Eager loading)
                 if (!string.IsNullOrEmpty(query.Expand))
                 {
                     var propertiesToExpand = query.Expand.Split(',');
@@ -141,6 +144,23 @@ namespace ZakDAK.Data
         {
             Ctx.Add<VORF>(frzg);
             Ctx.SaveChanges();
+        }
+
+        #endregion
+
+        #region FLTR
+
+        public FLTR GetFltr(string formkurz, string abfrage)
+        {
+            //var items = Ctx.FLTR_Tbl.AsQueryable();
+            var query = new Query()
+            {
+                Filter = "FORM = @0 and NAME = @1",
+                FilterParameters = new object[] { formkurz, abfrage }
+            };
+            var items = (IQueryable<FLTR>)QueryableFromQuery(query, Ctx.FLTR_Tbl);
+            var fltr = items.FirstOrDefault();
+            return fltr;
         }
 
         #endregion
