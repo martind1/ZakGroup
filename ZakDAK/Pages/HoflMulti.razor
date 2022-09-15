@@ -27,10 +27,10 @@
     RowUpdate="@OnUpdateRow" 
     RowCreate="@OnCreateRow">
     <Columns>
-        @foreach (var col in lnav.Columnlist.Columns)
+        @foreach (var col in lnav.Columnlist.SortedColumns)
         {
-            <RadzenDataGridColumn TItem="VORF" Property="@col.Key" Title="@col.Value.DisplayLabel" Width="@col.Value.WidthPx" Visible="@col.Value.IsVisible"
-                              SortOrder="@col.Value.SortOrder" />
+            <RadzenDataGridColumn TItem="VORF" Property="@col.Fieldname" Title="@col.DisplayLabel" Width="@col.WidthPx" Visible="@col.IsVisible"
+                              SortOrder="@col.SortOrder" />
         }
         <RadzenDataGridColumn TItem="VORF" Context="sampleBlazorModelsSampleOrder" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="120px">
             <Template Context="vorf">

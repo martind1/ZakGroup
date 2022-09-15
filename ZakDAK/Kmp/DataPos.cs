@@ -9,14 +9,36 @@ namespace ZakDAK.Kmp
     // SqlFieldList: Metadaten für Feldliste / .insert
 
 #region ColumnList
-    //ColumnList: Verbindung zur KMP Welt. Für SQL Where Clause
+    //ColumnList: Verbindung zur KMP Welt. Für Grid Columns
+    //15.09.22 md  Columns als IList ausgeprägt um nach ColIndex zu sortieren
     public class ColumnList
     {
-        public IDictionary<string, ColumnListItem> Columns { get; set; }
+        public IList<ColumnListItem> Columns { get; set; }
+
+        public IList<ColumnListItem> SortedColumns
+        {
+            get
+            {
+                var sc = from col in Columns orderby col.ColIndex select col;
+                return sc.ToList();
+            }
+        }
+
+        private int ColCounter = 0;
+
+        
+
+        //public IList<ColumnListItem> sortedColumns {
+        //    get {
+        //        var sc = new List<ColumnListItem>();
+        //        sc.Sort (c1, c2) => c1.ColIndex.CompareTo(c2.ColIndex);
+        //        return sc;
+        //    }
+        //}
 
         public ColumnList()
         {
-            Columns = new Dictionary<string, ColumnListItem>();
+            Columns = new List<ColumnListItem>();
         }
 
         public ColumnList(string columnlist) : this()
@@ -27,13 +49,20 @@ namespace ZakDAK.Kmp
                 StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
             foreach (var s in list)
             {
-                if (!s.StartsWith(";"))
-                {
-                    var SL = s.Split("=");
-                    var cli = new ColumnListItem(SL[0]);
-                    Columns.Add(SL[1], cli);
-                }
+                if (s.StartsWith(";"))
+                    continue;
+                AddColumn(s);
             }
+        }
+
+        public void AddColumn(string desc)
+        {
+            ColCounter++;
+            var col = new ColumnListItem(desc)
+            {
+                ColIndex = ColCounter
+            };
+            Columns.Add(col);
         }
     }
 
@@ -50,8 +79,11 @@ namespace ZakDAK.Kmp
     }
 
     // Beschreibung einer Spalte
+    // 15.09.22 md  Fieldname, ColIndex ergänzt
     public class ColumnListItem
     {
+        public int ColIndex { get; set; }  //Spaltenreihenfolge
+        public string Fieldname { get; set; }
         public string DisplayLabel { get; set; }
         public int DisplayWidth { get; set; } = 0;
         public string WidthPx { get { int dw8 = DisplayWidth * 8 + 16; return $"{dw8}px"; } }
@@ -77,28 +109,35 @@ namespace ZakDAK.Kmp
         public Radzen.SortOrder? SortOrder { get; set; }
 
 
-        //Spalte anhand KMP Beschreibung anlegen idF <Display>:<Width>,<[Option]*>
+        //Spalte anhand KMP Beschreibung anlegen idF <Display>:<Width>,<[Option]*>=<Fieldname>
         public ColumnListItem(string ColDesc)
         {
-            var SL1 = ColDesc.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            if (SL1.Length >= 1)
-            { 
-                var SL2 = SL1[0].Split(':');
-                DisplayLabel = SL2[0];
-                if (SL2.Length >= 2)
-                    DisplayWidth = int.Parse(SL2[1]);
-                foreach (var option in SL1[1..])
+            var SL0 = ColDesc.Split('=', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (SL0.Length >= 2)
+            {
+                Fieldname = SL0[1];
+                DisplayLabel = Fieldname;
+                DisplayWidth = 0;
+                var SL1 = SL0[0].Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                if (SL1.Length >= 1)
                 {
-                    ColumnListItemFlags flags = option switch
+                    var SL2 = SL1[0].Split(':');
+                    DisplayLabel = SL2[0];
+                    if (SL2.Length >= 2)
+                        DisplayWidth = int.Parse(SL2[1]);
+                    foreach (var option in SL1[1..])
                     {
-                        "S" => ColumnListItemFlags.Speicherwert,
-                        "M" => ColumnListItemFlags.Summe,
-                        "O" => ColumnListItemFlags.OptiBreite,
-                        "X" => ColumnListItemFlags.MaxBreite,
-                        "H" => ColumnListItemFlags.Hilfetext,
-                        _ => throw new NotImplementedException()
-                    };
-                    Flags |= flags;
+                        ColumnListItemFlags flags = option switch
+                        {
+                            "S" => ColumnListItemFlags.Speicherwert,
+                            "M" => ColumnListItemFlags.Summe,
+                            "O" => ColumnListItemFlags.OptiBreite,
+                            "X" => ColumnListItemFlags.MaxBreite,
+                            "H" => ColumnListItemFlags.Hilfetext,
+                            _ => throw new NotImplementedException()
+                        };
+                        Flags |= flags;
+                    }
                 }
             }
         }

@@ -15,7 +15,14 @@ namespace ZakDAK.Kmp
         //todo: nach NLnk - NavigatorLink - LinkService
         //Idee: hier auch individueller MaxRecordCount
         private ColumnList _columnlist;
-        public ColumnList Columnlist { get => _columnlist ??= LoadColumnlist(); set => _columnlist = value; }
+        public ColumnList Columnlist {
+            get { 
+                _columnlist ??= LoadColumnlist();
+                LoadKeyFields();  //hier wg überschreibt Columnlist
+                return _columnlist;
+            }
+            set => _columnlist = value; 
+        }
         private string _keyfields;
         public string KeyFields { get => _keyfields ??= LoadKeyFields(); set => _keyfields = value; }
         private FltrList _fltrlist;
@@ -24,8 +31,10 @@ namespace ZakDAK.Kmp
 
         public string OrderBy { get; set; }  //von Radzen.LoadDataArgs
 
+        //Liste mit Original Feldnamen (Groß/Kleinschreibung)
+        public IList<string> EntityFieldlist = DposUtils.GetFieldlist(typeof(TItem));
 
-        DpeData data;
+        protected DpeData data;
         private FLTR _fltrRec;  //Datensatz aus Tabelle 'FLTR'
         public FLTR FltrRec { get => _fltrRec ??= data.GetFltr(FormKurz, Abfrage); }
 
@@ -56,7 +65,7 @@ namespace ZakDAK.Kmp
             }
         }
 
-        RadzenDataGrid<TItem> grid;
+        public RadzenDataGrid<TItem> grid;
 
         public LocalService()
         {
@@ -72,8 +81,6 @@ namespace ZakDAK.Kmp
             this._formKurz = formKurz;
             //this.Abfrage = abfrage;  //mit SetAbfrage
             this._abfrage = abfrage;  //ohne SetAbfrage
-
-            Type myType = typeof(TItem);
 
             //References = LoadReferences(); * in Seite
         }
@@ -97,9 +104,26 @@ namespace ZakDAK.Kmp
 //erz_na1:13=erz_na1
 //erz_na2:14=erz_na2
 //erz_str:15=erz_str";
-            //return new ColumnList(cl);
-            var Result = FltrRec.Columnlist;
-            return Result;
+//return new ColumnList(cl);
+
+            var columnlist = FltrRec.Columnlist;  //von DB
+
+            //Groß/Klein korrigieren:
+            foreach (var col in columnlist.Columns)
+            {
+                col.Fieldname = DposUtils.AdjustFieldname(col.Fieldname, EntityFieldlist);
+            }
+
+            //fehlende Entity Felder als invisible ergänzen:
+            foreach (var field in EntityFieldlist)
+            {
+                var col = columnlist.Columns.Where(x => x.Fieldname == field).FirstOrDefault();
+                if (col == null)
+                {
+                    columnlist.AddColumn($"{field}:0={field}");
+                }
+            }
+            return columnlist;
         }
 
         #endregion
@@ -120,16 +144,18 @@ namespace ZakDAK.Kmp
             foreach (var keyfield in keyfields)
             {
                 var key = keyfield.Split(' ');
+                key[0] = DposUtils.AdjustFieldname(key[0], EntityFieldlist);  //Groß/Klein korrigieren
                 fields.Add(key[0], key.Length >= 2 ? key[1] : "asc");
             }
 
-            //nach Columnlist.Sortorder übertragen:
-            foreach (var key in this.Columnlist.Columns.Keys)
+            //nach Columnlist.Sortorder übertragen: 
+            // beware Columnlist sonst deadlock!
+            foreach (var col in _columnlist.Columns)
             {
-                if (fields.TryGetValue(key, out string keyvalue))
-                    Columnlist.Columns[key].SortOrder = keyvalue.ToLower() == "asc" ? Radzen.SortOrder.Ascending : Radzen.SortOrder.Descending;
+                if (fields.TryGetValue(col.Fieldname, out string keyvalue))
+                    col.SortOrder = keyvalue.ToLower() == "asc" ? Radzen.SortOrder.Ascending : Radzen.SortOrder.Descending;
                 else
-                    Columnlist.Columns[key].SortOrder = null;
+                    col.SortOrder = null;
             }
 
             return kf;
@@ -162,7 +188,7 @@ namespace ZakDAK.Kmp
         public string Filter { get => _filter; set => _filter = value; }   
         public string GetFilter()
         {
-            IList<string> FL = DposUtils.GetFieldlist(typeof(TItem));
+            //IList<string> FL = DposUtils.GetFieldlist(typeof(TItem));
 
             //Generate SQL: anhand FltrList und References:
             _filter = "(lityp=\"B\" or lityp=\"A\") and (lort_nr=\"57\") and (sta=\"H\")";
