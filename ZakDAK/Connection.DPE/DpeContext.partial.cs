@@ -14,7 +14,12 @@ namespace ZakDAK.Connection.DPE
             modelBuilder.Entity<ASWS>(entity => entity.ToTable("ASWS"));
 
             modelBuilder.Entity<R_INIT>(entity => entity.ToTable("R_INIT"));
-        }
 
+            //Precision:
+            modelBuilder.Entity<VORF>(entity =>
+            {
+                entity.Property(e => e.tagew).HasPrecision(28, 2);  //.HasColumnType("double?");
+            });
+        }
     }
 }

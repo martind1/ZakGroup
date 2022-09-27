@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Radzen.Blazor;
+using Serilog;
 using System.Text.Json;
 using ZakDAK.Shared;
 
@@ -17,12 +18,41 @@ namespace ZakDAK.Kmp
 
         public EventConsole console;
 
+        public void ProtX(ProtFlags flags, String Text)
+        {
+            if ((flags & ProtFlags.SMess) != 0)
+            {
+                StatusText = Text;
+                //Ereignis zum Anzeigen woanders auslösen:
+                StatusTextChanged();
+            }
+            if ((flags & ProtFlags.List) != 0)
+            {
+                if (console != null)
+                    console.Log(Text);
+                else
+                    Debug0();
+            }
+            if ((flags & ProtFlags.File) != 0)
+            {
+                Log.Information(Text);
+            }
+        }
+
+
+        public void Prot0(String Text)
+        {
+            ProtX(ProtFlags.File, Text);
+        }
+
+        public void Prot0SL(String Text)
+        {
+            ProtX(ProtFlags.File|ProtFlags.SMess|ProtFlags.List, Text);
+        }
 
         public void SMess(String Text)
         {
-            StatusText = Text;
-            //Ereignis zum Anzeigen woanders auslösen:
-            StatusTextChanged();
+            ProtX(ProtFlags.SMess, Text);
         }
 
         //Statuszeile mit Object->JSON
@@ -31,15 +61,10 @@ namespace ZakDAK.Kmp
             SMess(JsonSerializer.Serialize(value));
         }
 
-
         //Statuszeile und Protlist
         public void SMessL(String Text)
         {
-            SMess(Text);
-            if (console != null)
-                console.Log(Text);
-            else
-                Debug0();
+            ProtX(ProtFlags.SMess | ProtFlags.List, Text);
         }
 
         //Logfile und Statuszeile
@@ -52,4 +77,31 @@ namespace ZakDAK.Kmp
 #endregion
 
     }
+
+    [Flags]
+    public enum ProtFlags
+    {
+        SMess = 1,
+        List = 2,
+        File = 4,
+        Database = 8,
+        WarnDlg = 16,
+        ErrDlg = 32,
+        TimeStamp = 64
+    }
+    /*
+       TProtModus = (prTrm,    {Ausgabe in ListBox}
+                prFile,        {Ausgabe in Protokolldatei}
+                prRemain,      {Zeilenwechsel in Listbox unterdrücken}
+                prTimeStamp,   {mit Protokolierung von Timestamp}
+                prMsg,         {Ausgabe als Dialogbox}
+                prList,        {Ausgabe in Listbox}
+                prDatabase,    {Ausgabe in DB Tabelle}
+                prWarn,        {i.V.m. prMsg: 'Warnung'   (WMess: 'Information'}
+                prErr,         {i.V.m. WMessErr: 'Error'}
+                prSMess,       {Ausgabe in Statuszeile}
+                prNoLbStamp,   {In Listbox kein Timestamp, PC Nr}
+                prNoLbFocus);  {In Listbox auch bei Focus auffüllen}
+
+     */
 }

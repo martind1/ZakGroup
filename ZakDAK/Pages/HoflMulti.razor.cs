@@ -62,9 +62,11 @@ namespace ZakDAK.Pages
 
         protected override void OnParametersSet()
         {
+            Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier console!
+
             lnav = new LocalService<VORF>(vorfGrid, Data, formKurz, Abfrage)
             {
-                References = new FltrList("lityp=<>X\r\nsta=H")
+                References = new FltrList("sta=H")
             };
         }
 
@@ -80,28 +82,7 @@ namespace ZakDAK.Pages
         {
             if (firstRender)
             {
-                Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier noch keine console!
-
-                //12.09.22 Filter jetzt per LNav
-//                var doReload = false;
-//                var column = vorfGrid.ColumnsCollection.Where(c => c.Property == "sta").FirstOrDefault();
-//#pragma warning disable BL0005 // Component parameter should not be set outside of its component.
-//                //if (column != null)
-//                {
-//                    column.FilterValue = "Z";
-//                    column.FilterOperator = FilterOperator.NotEquals;
-//                    doReload = true;
-//                }
-//                column = vorfGrid.ColumnsCollection.Where(c => c.Property == "edt").FirstOrDefault();
-//                //if (column != null)
-//                {
-//                    column.FilterValue = new DateTime(2018, 1, 1);
-//                    column.FilterOperator = FilterOperator.GreaterThanOrEquals;
-//                    doReload = true;
-//                }
-//#pragma warning restore BL0005 // Component parameter should not be set outside of its component.
-//                if (doReload)
-//                  vorfGrid.Reload();
+                //Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier console
             }
             return base.OnAfterRenderAsync(firstRender);
         }
@@ -212,17 +193,19 @@ namespace ZakDAK.Pages
             }
             //merken für später
             lnav.OrderBy = args.OrderBy;
-
             Prot.SMessL($"Skip: {args.Skip}, Top: {args.Top}, pagesize={pagesize}");
 
-            args.Filter = lnav.GetFilter();  //SQL generieren
-            vorf_tbl = Data.VorfQuery(args).ToList();
+            lnav.GenFilter();  //SQL Filter und Parameters generieren
+            var query = Data.QueryFromLoadDataArgs(args);
+            query.Filter = lnav.Filter;
+            query.FilterParameters = lnav.FilterParameters;
+            Prot.Prot0SL($"Filter:{query.Filter}");
+            Prot.Prot0SL($"Filterparameter:{JsonSerializer.Serialize(query.FilterParameters)}");
+            vorf_tbl = Data.VorfQuery(query).ToList();
             //Idee ohne Data Service: vorf_tbl = lnav.queryList();
-            count = Data.VorfQueryCount(args);
 
+            count = Data.VorfQueryCount(query);
             Prot.SMessL($"Loaded. Count: {count}");
-
-
 
             isLoading = false;
         }
@@ -280,8 +263,13 @@ namespace ZakDAK.Pages
             }
         }
 
+
+        /// <summary>
+        /// Daten alle 120s refreshen (Tablet Hofliste)
+        /// </summary>
         void Poll()
         {
+            Prot.SMessL("Poll Timer: Reset");
             _ = Reset();
         }
 

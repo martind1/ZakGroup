@@ -1,4 +1,5 @@
 ﻿using NuGet.Protocol;
+using Serilog;
 using System.Security.Policy;
 
 namespace ZakDAK.Kmp
@@ -20,7 +21,7 @@ namespace ZakDAK.Kmp
             get
             {
                 var sc = from col in Columns orderby col.ColIndex select col;
-                return sc.ToList();
+                return sc.ToList();  //ergibt eine sortierte Kopie von Columns
             }
         }
 
@@ -146,13 +147,14 @@ namespace ZakDAK.Kmp
 
 #region FltrList und SQL generieren (Where Clause)
     //FltrList: Verbindung zur KMP Welt. Für SQL Where Clause
-    public class FltrList
+    public partial class FltrList
     {
-        public IDictionary<string, FltrListItem> Fltrs { get; set; }
+        public IList<FltrListItem> Fltrs { get; set; }
 
         public FltrList()
         {
-            Fltrs = new Dictionary<string, FltrListItem>();
+            Fltrs = new List<FltrListItem>();
+            SqlParams = new Dictionary<int, object>();
         }
 
         public FltrList(string fltrlist) : this()
@@ -165,21 +167,14 @@ namespace ZakDAK.Kmp
             {
                 if (!s.StartsWith(";"))
                 {
-                    var SL = s.Split("=");
+                    var SL = s.Split2("=");  //beware ANL_NA1=AGH%;=
                     if (SL.Length >= 2 && !String.IsNullOrEmpty(SL[1]))
                     {
-                        var fli = new FltrListItem(SL[1]);
-                        Fltrs.Add(SL[0], fli);
+                        var fli = new FltrListItem(SL[0], SL[1]);
+                        Fltrs.Add(fli);
                     }
                 }
             }
-        }
-
-        //ergibt komplette Where-Clause für die FltrList bzw LNav.References+Fltrlist
-        public string GetWhere()
-        {
-            //todo: Kmp.SqlService.GetWhere(fltrlist)
-            return "";
         }
     }
 
@@ -188,15 +183,17 @@ namespace ZakDAK.Kmp
     // KmpStr (von Kmp.Fltrlist.Zeile): a >a <a == >= a;b;c [raw Feld-Argument] {raw Zeile ohne Feld}
     // Where (für Linq): <FldName> = "a" oder <FldName> > b
     // OrFlag (Kmp beginnt mit ';'): true = Verknüpfung mit 'or' mit anderen Feldern (und entspr Klammerung)
-    public class FltrListItem
+    public partial class FltrListItem
     {
         public string KmpStr { get; set; }
-        public string Where { get; set; }
-        public bool OrFlag { get; set; } = false;
+        public string Fieldname { get; set; }
+
+        public string SqlWhere { get; set; }
 
         //Item anhand KMP Beschreibung anlegen. Noch kein Where/SQL
-        public FltrListItem(string kmpstr)
+        public FltrListItem(string fieldname, string kmpstr)
         {
+            Fieldname = fieldname;
             KmpStr = kmpstr;
         }
     }

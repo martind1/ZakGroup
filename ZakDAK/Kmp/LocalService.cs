@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Newtonsoft.Json.Linq;
+using NuGet.Packaging;
 using NuGet.Protocol;
 using Radzen.Blazor;
+using System.Drawing.Drawing2D;
 using System.Security.Policy;
 using ZakDAK.Data;
 using ZakDAK.Entities.DPE;
+using static ZakDAK.Kmp.DposUtils;
 
 namespace ZakDAK.Kmp
 {
@@ -32,7 +35,7 @@ namespace ZakDAK.Kmp
         public string OrderBy { get; set; }  //von Radzen.LoadDataArgs
 
         //Liste mit Original Feldnamen (Groß/Kleinschreibung)
-        public IList<string> EntityFieldlist = DposUtils.GetFieldlist(typeof(TItem));
+        public IDictionary<string, FieldInfo> EntityFieldlist = DposUtils.GetFieldlist(typeof(TItem));
 
         protected DpeData data;
         private FLTR _fltrRec;  //Datensatz aus Tabelle 'FLTR'
@@ -43,8 +46,12 @@ namespace ZakDAK.Kmp
         public string Abfrage { get => _abfrage; set => SetAbfrage(value); }
         public void SetAbfrage(string value)
         {
-            if ((_abfrage ?? string.Empty) != (value ?? string.Empty)) { 
-                _abfrage = value;
+            var oldAbfrage = _abfrage;
+            _abfrage = value;
+            //wenn Abfrage entfernt wird dann Rest nicht entfernen.
+            //Abfrage wird entfernt bei User-Änderungen bzgl Filter,Sort,Columns
+            if (!String.IsNullOrEmpty(value) && (oldAbfrage ?? string.Empty) != value) { 
+                //s.o. _abfrage = value;
                 _fltrRec = null; //neu Laden von Abfrage
                 _columnlist = null; //neu Laden von Abfrage
                 _keyfields = null; //neu Laden von Abfrage
@@ -111,11 +118,11 @@ namespace ZakDAK.Kmp
             //Groß/Klein korrigieren:
             foreach (var col in columnlist.Columns)
             {
-                col.Fieldname = DposUtils.AdjustFieldname(col.Fieldname, EntityFieldlist);
+                col.Fieldname = DposUtils.AdjustFieldname(col.Fieldname, EntityFieldlist.Keys.ToList<string>());
             }
 
             //fehlende Entity Felder als invisible ergänzen:
-            foreach (var field in EntityFieldlist)
+            foreach (var field in EntityFieldlist.Keys.ToList<string>())
             {
                 var col = columnlist.Columns.Where(x => x.Fieldname == field).FirstOrDefault();
                 if (col == null)
@@ -133,9 +140,9 @@ namespace ZakDAK.Kmp
         //KeyFields von Abfrage laden und nach Columnlist.Sortorder übertragenb
         public string LoadKeyFields()
         {
-            //todo: von Abfrage laden
-            //todo: Groß/Kleinschreibung prüfen, anpassen oder Fehler wenn nicht gefunden
-            //string kf = "edt;ETm desc";
+            //von Abfrage laden
+            //Groß/Kleinschreibung prüfen, anpassen oder Fehler wenn nicht gefunden
+            //Bsp  "edt;ETm desc"
             string kf = FltrRec.KEYFIELDS;
 
             string[] keyfields = kf.Split(";", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
@@ -144,7 +151,7 @@ namespace ZakDAK.Kmp
             foreach (var keyfield in keyfields)
             {
                 var key = keyfield.Split(' ');
-                key[0] = DposUtils.AdjustFieldname(key[0], EntityFieldlist);  //Groß/Klein korrigieren
+                key[0] = DposUtils.AdjustFieldname(key[0], EntityFieldlist.Keys.ToList<string>());  //Groß/Klein korrigieren
                 fields.Add(key[0], key.Length >= 2 ? key[1] : "asc");
             }
 
@@ -167,12 +174,15 @@ namespace ZakDAK.Kmp
 
         public FltrList LoadFltrlist()
         {
-            //Test: statische Liste
-            //todo: von Abfrage laden: LookUp FLTR[formKurz, Abfrage].FltrList
-            //string fl = "lityp=B;A\r\nlort_nr=57";
-            //return new FltrList(fl);
-            var Result = FltrRec.Fltrlist;
-            return Result;
+            //von Abfrage laden: LookUp FLTR[formKurz, Abfrage].FltrList
+            //Bsp  "lityp=B;A\r\nlort_nr=57";
+            var fltrlist = FltrRec.Fltrlist;
+            //Groß/Klein korrigieren:
+            foreach (var fltr in fltrlist.Fltrs)
+            {
+                fltr.Fieldname = DposUtils.AdjustFieldname(fltr.Fieldname, EntityFieldlist.Keys.ToList<string>());
+            }
+            return fltrlist;
         }
 
         public FltrList LoadReferences()
@@ -185,14 +195,27 @@ namespace ZakDAK.Kmp
 
         //SQL Where Caluse generieren: Für Radzen Query
         private string _filter;
-        public string Filter { get => _filter; set => _filter = value; }   
-        public string GetFilter()
+        public string Filter { get => _filter; set => _filter = value; }
+        private object[] _filterParameters;
+        public object[] FilterParameters { get => _filterParameters; set => _filterParameters = value; }
+
+        public void GenFilter()
         {
-            //IList<string> FL = DposUtils.GetFieldlist(typeof(TItem));
+            var allFltrlist = new FltrList();
+            allFltrlist.Fltrs.AddRange(Fltrlist.Fltrs);
+            allFltrlist.Fltrs.AddRange(References.Fltrs);
+            //todo: FltrList und References zusammenführen (evtl über die SqlTokens, oder später getrennt zusammenführen:Parameter? )
+
+            //Fltrlist.GenSqlWhere(_filter, _filterparameter);  //schreibt nach _filter und Parameter
+            //erstmal ohne Parameter:
+            allFltrlist.GenSqlWhere(EntityFieldlist);  //schreibt nach SqlWhere und SqlParams
+            _filter = allFltrlist.SqlWhere;
+            _filterParameters = allFltrlist.SqlParams.Values.ToArray<object>();
 
             //Generate SQL: anhand FltrList und References:
-            _filter = "(lityp=\"B\" or lityp=\"A\") and (lort_nr=\"57\") and (sta=\"H\")";
-            return _filter;
+            //works _filter = "(lityp=\"B\" or lityp=\"A\") and (lort_nr=\"57\") and anl_na1 .contains(\"AGH\") and (sta=\"H\")";
+            //DynamicFunctions.Like(Brand, \"%a%\")
+            //_filter = "(lityp=\"B\" or lityp=\"A\") and (lort_nr=\"57\") and Like(anl_na1, \"%A_H%\" and (sta=\"H\")";
         }
 
         #endregion

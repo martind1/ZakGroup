@@ -21,11 +21,11 @@ namespace ZakDAK.Data
 
         public DpeData(DpeContext ctx, NavigationManager navigationManager)
         {
-            this.Ctx = ctx;
+            Ctx = ctx;
             this.navigationManager = navigationManager;
         }
 
-        // von CRMDemoBlazor:
+        // von CRMDemoBlazor / dynamic-linq:
         public IQueryable QueryableFromQuery(Query query, IQueryable items)
         {
             if (query != null)
@@ -72,7 +72,8 @@ namespace ZakDAK.Data
 
         public Query QueryFromLoadDataArgs(LoadDataArgs args)
         {
-            //siehe d:\Blazor\Repos\radzenhq\radzen-blazor\Radzen.Blazor\Common.cs
+            //dynamic-linq, siehe d:\Blazor\Repos\radzenhq\radzen-blazor\Radzen.Blazor\Common.cs
+            //für LoadData Event
             var query = new Query
             {
                 Skip = args.Skip,
@@ -92,14 +93,7 @@ namespace ZakDAK.Data
             {
                 items = (IQueryable<VORF>)QueryableFromQuery(query, items);
             }
-
             return items;
-        }
-
-        public IQueryable<VORF> VorfQuery(LoadDataArgs args)
-        {
-            var query = QueryFromLoadDataArgs(args);
-            return VorfQuery(query);
         }
 
         public int VorfQueryCount(Query query)
@@ -116,33 +110,27 @@ namespace ZakDAK.Data
             return items.Count();
         }
 
-        public int VorfQueryCount(LoadDataArgs args)
-        {
-            var query = QueryFromLoadDataArgs(args);
-            return VorfQueryCount(query);
-        }
 
-
-        public void VorfUpdate(VORF frzg)
+        public void VorfUpdate(VORF vorf)
         {
-            Ctx.Update<VORF>(frzg);
+            Ctx.Update<VORF>(vorf);
             Ctx.SaveChanges();
         }
 
-        public EntityEntry<VORF> VorfEntry(VORF frzg)
+        public EntityEntry<VORF> VorfEntry(VORF vorf)
         {
-            return Ctx.Entry<VORF>(frzg);
+            return Ctx.Entry<VORF>(vorf);
         }
 
-        public void VorfRemove(VORF frzg)
+        public void VorfRemove(VORF vorf)
         {
-            Ctx.Remove<VORF>(frzg);
+            Ctx.Remove<VORF>(vorf);
             Ctx.SaveChanges();
         }
 
-        public void VorfAdd(VORF frzg)
+        public void VorfAdd(VORF vorf)
         {
-            Ctx.Add<VORF>(frzg);
+            Ctx.Add<VORF>(vorf);
             Ctx.SaveChanges();
         }
 
@@ -160,7 +148,7 @@ namespace ZakDAK.Data
             };
             var items = (IQueryable<FLTR>)QueryableFromQuery(query, Ctx.FLTR_Tbl);
             var fltr = items.FirstOrDefault();
-            return fltr;
+            return fltr;  //null bei EOF
         }
 
         #endregion
