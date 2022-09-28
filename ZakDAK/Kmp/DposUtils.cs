@@ -49,8 +49,8 @@ namespace ZakDAK.Kmp
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 //keine erweiterten Felder
-                //if (propertyInfo.GetMethod == null)
-                fieldlist.Add(propertyInfo.Name, new FieldInfo(propertyInfo.PropertyType));
+                if (propertyInfo.SetMethod != null)
+                    fieldlist.Add(propertyInfo.Name, new FieldInfo(propertyInfo.PropertyType));
             }
             return fieldlist;
         }

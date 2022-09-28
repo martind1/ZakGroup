@@ -9,15 +9,24 @@
                         class="oi oi-magnifying-glass" />
         <RadzenButton Click=@OnRefreshClick Text="Aktualisieren" ButtonStyle="ButtonStyle.Light" 
                         class="oi oi-reload" style="padding-left: 10px" />
+        <RadzenButton Click=@OnErfassClick Text="Erfassen" ButtonStyle="ButtonStyle.Light"
+                      Icon="add_circle_outline" style="padding-left: 10px" />
+        <RadzenButton Click=@OnEditClick Text="Ändern" ButtonStyle="ButtonStyle.Light"
+                      class="oi oi-pencil" style="padding-left: 10px" Disabled="true"/>
 
         <RadzenCheckBox @bind-Value=@GNav.ShowEventConsole Name="chbEventConsole" TValue="bool" Change=@(args => OnEventConsole(args, "chbEventConsole")) />
         <RadzenLabel Text="Protokoll" Component="chbEventConsole" Style="margin-left: 8px; vertical-align: middle;" />
 
+        <RadzenLabel Text="Zeilen:" Component="cobPageSize" Style="margin-left: 8px; vertical-align: middle;" />
         <RadzenDropDown AllowClear="false" TValue="string" Name="cobPageSize"
                         Data=@GNav.MaxRecordCountValues.Keys.ToList() Value=@GNav.MaxRecordCount.ToString()
-                        Change=@(args => OnPageSizeChange(args, "DropDown")) />
-        <RadzenLabel Text="Zeilen" Component="cobPageSize" Style="margin-left: 8px; vertical-align: middle;" />
-    </div>
+                        Change=@(args => OnPageSizeChange(args, "DropDown")) 
+                        Style="margin-left: 8px; vertical-align: middle; width: 90px;" />
+
+        <RadzenLabel Text="Datensätze:" Component="edRecordCount" Style="margin-left: 8px; vertical-align: middle;" />
+        <RadzenNumeric Disabled="true" TValue="int" @bind-Value=@GNav.RecordCount Style="margin-left: 8px; vertical-align: middle; width: 90px !important;" />
+        <h1>@GNav.Pagetitle</h1>
+    </div> 
     <div class="console-content" id="global-navigator">
         <div class="console-message">
             <span class="console-message-text">@Prot.StatusText</span>
@@ -43,6 +52,15 @@
         GNav.Kommando(Kmp.GlobalService.KommandoTyp.Refresh);
     }
 
+    void OnErfassClick()
+    {
+        GNav.Kommando(Kmp.GlobalService.KommandoTyp.Erfass);
+    }
+
+    void OnEditClick()
+    {
+        GNav.Kommando(Kmp.GlobalService.KommandoTyp.Edit);
+    }
     protected override void OnInitialized()
     {
         Prot.OnStatusTextChange += StateHasChanged;  //build-in:Refresh

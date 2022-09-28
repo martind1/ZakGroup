@@ -65,6 +65,8 @@ namespace ZakDAK.Kmp
             bool firstFlag = true;
             foreach (var item in Fltrs)
             {
+                if (!entityFieldlist.ContainsKey(item.Fieldname))
+                    throw new ArgumentException($"FltrList: ungültiges Feld ({item.Fieldname})");
                 var fieldinfo = entityFieldlist[item.Fieldname];
                 item.GenLinqSqlStr(fieldinfo, this);
                 if (oldSqlOrFlag != item.SqlOrFlag)

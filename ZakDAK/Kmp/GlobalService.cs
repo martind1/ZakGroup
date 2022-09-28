@@ -13,7 +13,7 @@ namespace ZakDAK.Kmp
 #region Kommando, Status
         public enum KommandoTyp
         {
-            Suchen, Refresh, Pagesize
+            Suchen, Refresh, Pagesize, Erfass, Edit
         }
         public event Action<int> OnDoKommando;
         private void DoKommando(int KNr) => OnDoKommando?.Invoke(KNr);
@@ -34,6 +34,8 @@ namespace ZakDAK.Kmp
         //später: navLink. Ziel: in Page-File: Navlink nl = new NavLink('SPED'), Data von JSON-DB/R_INIT
 
         public LocalService<Object> lnav;
+        public int RecordCount { get; set; } = 0;
+        public string Pagetitle { get; set; }
 
         public void SetLNav<T>(Object ln)
         {

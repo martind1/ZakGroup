@@ -10,7 +10,7 @@
 @using Serilog;
 @using Utils;
 
-<h1>Hofliste</h1>
+<PageTitle>@lnav.Pagetitle</PageTitle>
 <BlazorTimer Seconds="@PollSeconds" Callback="Poll"></BlazorTimer>
 <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add New Order" Click="@InsertRow" Disabled=@(vorfToInsert != null) />
 <RadzenDataGrid @ref="vorfGrid" 

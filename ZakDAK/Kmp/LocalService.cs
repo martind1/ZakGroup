@@ -15,6 +15,8 @@ namespace ZakDAK.Kmp
     //Der lokale Navigator
     public class LocalService<TItem>
     {
+        //hier kein Inject !! (GNav, DpeData, Prots usw) -->von Page übergeben ->später:GNav als Singleton anlegen!!!
+
         //todo: nach NLnk - NavigatorLink - LinkService
         //Idee: hier auch individueller MaxRecordCount
         private ColumnList _columnlist;
@@ -35,7 +37,7 @@ namespace ZakDAK.Kmp
         public string OrderBy { get; set; }  //von Radzen.LoadDataArgs
 
         //Liste mit Original Feldnamen (Groß/Kleinschreibung)
-        public IDictionary<string, FieldInfo> EntityFieldlist = DposUtils.GetFieldlist(typeof(TItem));
+        public IDictionary<string, FieldInfo> EntityFieldlist { get; set; }
 
         protected DpeData data;
         private FLTR _fltrRec;  //Datensatz aus Tabelle 'FLTR'
@@ -72,17 +74,17 @@ namespace ZakDAK.Kmp
             }
         }
 
-        public RadzenDataGrid<TItem> grid;
+        private readonly GlobalService gnav;
 
         public LocalService()
         {
-            
-        }
+            EntityFieldlist = DposUtils.GetFieldlist(typeof(TItem));
+    }
 
-        public LocalService(RadzenDataGrid<TItem> grid, DpeData data, string formKurz, string abfrage): this()
+        public LocalService(GlobalService gnav, DpeData data, string formKurz, string abfrage): this()
         {
             //todo: an GNav weiterleiten
-            this.grid = grid;
+            this.gnav = gnav;
             this.data = data;
 
             this._formKurz = formKurz;
@@ -92,28 +94,54 @@ namespace ZakDAK.Kmp
             //References = LoadReferences(); * in Seite
         }
 
-#region ColumnList
+        #region Live (recordcount, ..)
+
+        private int _recordcount;
+        public int Recordcount { 
+            get { return _recordcount; }
+            set { _recordcount = value;
+                if (gnav != null) gnav.RecordCount = value;
+            }
+        }
+
+        private string _pagetitle;
+        public string Pagetitle
+        {
+            get { return _pagetitle; }
+            set
+            {
+                _pagetitle = value;
+                if (gnav != null) gnav.Pagetitle = value;
+            }
+        }
+
+        #endregion
+
+
+
+        #region ColumnList  
 
         public ColumnList LoadColumnlist()
         {
             //Test: statische Liste
             //todo: von Abfrage laden
             //string cl = 
-//@"Quittung:5=HOFL_KTRL
-//sta:0=sta
-//edt:0=edt
-//Lieferart:10=lityp
-//Ein:5=ETm
-//Fahrzeug:11=fahr_knz
-//Beförderer:23=anl_na1
-//Sorte Bez.:21=srte_bez
-//Tara:8=tagew
-//erz_na1:13=erz_na1
-//erz_na2:14=erz_na2
-//erz_str:15=erz_str";
-//return new ColumnList(cl);
+            //@"Quittung:5=HOFL_KTRL
+            //sta:0=sta
+            //edt:0=edt
+            //Lieferart:10=lityp
+            //Ein:5=ETm
+            //Fahrzeug:11=fahr_knz
+            //Beförderer:23=anl_na1
+            //Sorte Bez.:21=srte_bez
+            //Tara:8=tagew
+            //erz_na1:13=erz_na1
+            //erz_na2:14=erz_na2
+            //erz_str:15=erz_str";
+            //return new ColumnList(cl);
 
-            var columnlist = FltrRec.Columnlist;  //von DB
+            ColumnList columnlist = (FltrRec == null) ? new ColumnList() : FltrRec.cfColumnlist;  //von DB
+            int width = (FltrRec == null) ? 8 : 0;
 
             //Groß/Klein korrigieren:
             foreach (var col in columnlist.Columns)
@@ -121,13 +149,15 @@ namespace ZakDAK.Kmp
                 col.Fieldname = DposUtils.AdjustFieldname(col.Fieldname, EntityFieldlist.Keys.ToList<string>());
             }
 
+
             //fehlende Entity Felder als invisible ergänzen:
+            //Wenn keine Abfrage/FltrRec dann Standardbereite (width)
             foreach (var field in EntityFieldlist.Keys.ToList<string>())
             {
                 var col = columnlist.Columns.Where(x => x.Fieldname == field).FirstOrDefault();
                 if (col == null)
                 {
-                    columnlist.AddColumn($"{field}:0={field}");
+                    columnlist.AddColumn($"{field}:{width}={field}");
                 }
             }
             return columnlist;
@@ -143,7 +173,7 @@ namespace ZakDAK.Kmp
             //von Abfrage laden
             //Groß/Kleinschreibung prüfen, anpassen oder Fehler wenn nicht gefunden
             //Bsp  "edt;ETm desc"
-            string kf = FltrRec.KEYFIELDS;
+            string kf = (FltrRec == null) ? "" : FltrRec.KEYFIELDS;
 
             string[] keyfields = kf.Split(";", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             IDictionary<string, string> fields = new Dictionary<string, string>();
@@ -176,7 +206,7 @@ namespace ZakDAK.Kmp
         {
             //von Abfrage laden: LookUp FLTR[formKurz, Abfrage].FltrList
             //Bsp  "lityp=B;A\r\nlort_nr=57";
-            var fltrlist = FltrRec.Fltrlist;
+            FltrList fltrlist = (FltrRec == null) ? new FltrList() : FltrRec.cfFltrlist;
             //Groß/Klein korrigieren:
             foreach (var fltr in fltrlist.Fltrs)
             {

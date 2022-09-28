@@ -7,8 +7,10 @@ namespace ZakDAK.Entities.DPE
     public partial class FLTR
     {
         //berechnete Eigenschaften
-        public ColumnList Columnlist { get => new(COLUMNLIST); }
+        //keine Spaltennamen (auch nicht als Lowercase)! Deshalb Prefix 'cf':
+        //keine Setter!
+        public ColumnList cfColumnlist { get => new(COLUMNLIST); }
 
-        public FltrList Fltrlist { get => new(FLTRLIST); }
+        public FltrList cfFltrlist { get => new(FLTRLIST); }
     }
 }

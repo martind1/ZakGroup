@@ -4,10 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2022-09-27-KmpToLinqWorks</Version>
+    <Version>2022-09-28-FLTRFrm</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <FileVersion>22.09.27</FileVersion>
-    <AssemblyVersion>22.09.27</AssemblyVersion>
+    <FileVersion>22.09.28</FileVersion>
+    <AssemblyVersion>22.09.28</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

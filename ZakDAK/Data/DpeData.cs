@@ -153,5 +153,56 @@ namespace ZakDAK.Data
 
         #endregion
 
+        #region Entity
+
+        public IQueryable<T> EntityQuery<T>(Query query) where T : class
+        {
+            var items = Ctx.Set<T>().AsQueryable();
+            if (query != null)
+            {
+                items = (IQueryable<T>)QueryableFromQuery(query, items);
+            }
+            return items;
+        }
+
+        public int EntityQueryCount<T>(Query query) where T : class
+        {
+            var items = Ctx.Set<T>().AsQueryable();
+            //items = items.Include(i => i.Contact);
+            //items = items.Include(i => i.OpportunityStatus);
+            if (query != null)
+            {
+                query.Skip = null;
+                query.Top = null;
+                items = (IQueryable<T>)QueryableFromQuery(query, items);
+            }
+            return items.Count();
+        }
+
+        public void EntityUpdate<T>(T entity) where T : class
+        {
+            Ctx.Update<T>(entity);
+            Ctx.SaveChanges();
+        }
+
+        public EntityEntry EntityEntry<T>(T entity) where T : class
+        {
+            return Ctx.Entry<T>(entity);
+        }
+
+        public void EntityRemove<T>(T entity) where T : class
+        {
+            Ctx.Remove<T>(entity);
+            Ctx.SaveChanges();
+        }
+
+        public void EntityAdd<T>(T entity) where T : class
+        {
+            Ctx.Add<T>(entity);
+            Ctx.SaveChanges();
+        }
+
+        #endregion
+
     }
 }

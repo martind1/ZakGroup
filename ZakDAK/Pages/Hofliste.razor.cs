@@ -25,7 +25,7 @@ using ZakDAK.Shared;
 
 namespace ZakDAK.Pages
 {
-    public partial class HoflMulti
+    public partial class Hofliste
     {
         RadzenDataGrid<VORF> vorfGrid;
         IList<VORF> vorf_tbl;
@@ -43,7 +43,7 @@ namespace ZakDAK.Pages
         [Inject]
         private ProtService Prot { get; set; }
 
-        public HoflMulti()
+        public Hofliste()
         {
             //GNav ist hier noch null!
             //vorfGrid ist hier noch null!
@@ -64,9 +64,10 @@ namespace ZakDAK.Pages
         {
             Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier console!
 
-            lnav = new LocalService<VORF>(vorfGrid, Data, formKurz, Abfrage)
+            lnav = new LocalService<VORF>(GNav, Data, formKurz, Abfrage)
             {
-                References = new FltrList("sta=H")
+                References = new FltrList("sta=H"),
+                Pagetitle = "ZAK Digitale Annahmekontrolle"
             };
         }
 
