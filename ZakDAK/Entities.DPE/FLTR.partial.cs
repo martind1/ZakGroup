@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using ZakDAK.Kmp;
 
 namespace ZakDAK.Entities.DPE
@@ -8,9 +9,10 @@ namespace ZakDAK.Entities.DPE
     {
         //berechnete Eigenschaften
         //keine Spaltennamen (auch nicht als Lowercase)! Deshalb Prefix 'cf':
-        //keine Setter!
+        [NotMapped]
         public ColumnList cfColumnlist { get => new(COLUMNLIST); }
 
+        [NotMapped]
         public FltrList cfFltrlist { get => new(FLTRLIST); }
     }
 }

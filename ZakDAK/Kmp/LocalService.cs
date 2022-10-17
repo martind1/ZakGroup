@@ -46,19 +46,27 @@ namespace ZakDAK.Kmp
 
         private string _abfrage;
         public string Abfrage { get => _abfrage; set => SetAbfrage(value); }
+
+        //Bei neuer Abfrage Metadaten neu einlesen
         public void SetAbfrage(string value)
         {
             var oldAbfrage = _abfrage;
             _abfrage = value;
             //wenn Abfrage entfernt wird dann Rest nicht entfernen.
             //Abfrage wird entfernt bei User-Änderungen bzgl Filter,Sort,Columns
-            if (!String.IsNullOrEmpty(value) && (oldAbfrage ?? string.Empty) != value) { 
+            if (!String.IsNullOrEmpty(value) && (oldAbfrage ?? string.Empty) != value) {
                 //s.o. _abfrage = value;
-                _fltrRec = null; //neu Laden von Abfrage
-                _columnlist = null; //neu Laden von Abfrage
-                _keyfields = null; //neu Laden von Abfrage
-                _fltrlist = null; //neu Laden von AbfrageLoadFltrlist();
+                RefreshAbfrage();
             }
+        }
+
+        //erzwingt Neueinlesen von FLTR Tabelle
+        public void RefreshAbfrage()
+        {
+            _fltrRec = null; //neu Laden von Abfrage
+            _columnlist = null; //neu Laden von Abfrage
+            _keyfields = null; //neu Laden von Abfrage
+            _fltrlist = null; //neu Laden von AbfrageLoadFltrlist();
         }
         private string _formKurz;
         public string FormKurz { get => _formKurz; set => SetFormKurz(value); }
@@ -114,6 +122,9 @@ namespace ZakDAK.Kmp
                 if (gnav != null) gnav.Pagetitle = value;
             }
         }
+
+        private GlobalService.PageState _pageState;
+        public GlobalService.PageState PageState { get; set; } = GlobalService.PageState.Multi;
 
         #endregion
 

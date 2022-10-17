@@ -22,19 +22,22 @@ using ZakDAK.Data;
 using ZakDAK.Entities.DPE;
 using ZakDAK.Kmp;
 using ZakDAK.Shared;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Radzen.Blazor.Rendering;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ZakDAK.Pages
 {
     public partial class Hofliste
     {
-        RadzenDataGrid<VORF> vorfGrid;
-        IList<VORF> vorf_tbl;
-        IList<VORF> selectedVORF;
-        LocalService<VORF> lnav;
+        RadzenDataGrid<V_LADEZETTEL> grid;
+        IList<V_LADEZETTEL> tbl;
+        IList<V_LADEZETTEL> selectedList;
+        LocalService<V_LADEZETTEL> lnav;
 
-        //private string _abfrage = "Standard";
         [Parameter]
-        //public string Abfrage { get => String.IsNullOrEmpty(_abfrage) ? "Standard" : _abfrage; set => _abfrage = value; }
         public string Abfrage { get; set; } = "Standard";
         public string formKurz = "HTTP";
 
@@ -42,15 +45,25 @@ namespace ZakDAK.Pages
         private GlobalService GNav { get; set; }
         [Inject]
         private ProtService Prot { get; set; }
+        [Inject]
+        DpeData Data { get; set; }
+
+        #region Initialisieren, Starten, LoadData
+
+        protected bool isLoading = false;
+        protected int pagesize;  //LNav bzw GNax MaxRecordCount
+
+        bool Fullscreen = false; //hier setzen!
+        string gridStyle;
 
         public Hofliste()
         {
             //GNav ist hier noch null!
-            //vorfGrid ist hier noch null!
+            //grid ist hier noch null!
+            gridStyle = Fullscreen ?
+                "height: 100vh; width: 100vw; " :
+                "height: 50vh; width: calc(100vw - 250px);";
         }
-
-        [Inject]
-        DpeData Data { get; set; }
 
         protected override void OnInitialized()
         {
@@ -64,126 +77,19 @@ namespace ZakDAK.Pages
         {
             Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier console!
 
-            lnav = new LocalService<VORF>(GNav, Data, formKurz, Abfrage)
+            lnav = new LocalService<V_LADEZETTEL>(GNav, Data, formKurz, Abfrage)
             {
+                Pagetitle = "ZAK Digitale Annahmekontrolle",
                 References = new FltrList("sta=H"),
-                Pagetitle = "ZAK Digitale Annahmekontrolle"
             };
         }
-
-        #region Konfiguration
-
-        public int PollSeconds { get; set; } = 120;
-
-        #endregion
-
-        #region Demo Inline Insert, Edit, Delete
-
-        protected override Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (firstRender)
-            {
-                //Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier console
-            }
-            return base.OnAfterRenderAsync(firstRender);
-        }
-
-        async Task EditRow(VORF vorf)
-        {
-            await vorfGrid.EditRow(vorf);
-        }
-
-        void OnUpdateRow(VORF vorf)
-        {
-            if (vorf == vorfToInsert)
-            {
-                vorfToInsert = null;
-            }
-
-            Data.VorfUpdate(vorf);
-            // For demo purposes only
-            //vorf.Customer = dbContext.Customers.Find(vorf.CustomerID);
-            //vorf.Employee = dbContext.Employees.Find(vorf.EmployeeID);
-            // For production
-            //dbContext.SaveChanges();
-        }
-
-        async Task SaveRow(VORF vorf)
-        {
-            if (vorf == vorfToInsert)
-            {
-                vorfToInsert = null;
-            }
-
-            await vorfGrid.UpdateRow(vorf);
-        }
-
-        void CancelEdit(VORF vorf)
-        {
-            if (vorf == vorfToInsert)
-            {
-                vorfToInsert = null;
-            }
-
-            vorfGrid.CancelEditRow(vorf);
-            // For production
-            var vorfEntry = Data.VorfEntry(vorf);
-            if (vorfEntry.State == EntityState.Modified)
-            {
-                vorfEntry.CurrentValues.SetValues(vorfEntry.OriginalValues);
-                vorfEntry.State = EntityState.Unchanged;
-            }
-        }
-
-        async Task DeleteRow(VORF vorf)
-        {
-            if (vorf == vorfToInsert)
-            {
-                vorfToInsert = null;
-            }
-
-            if (vorf_tbl.Contains(vorf))
-            {
-                Data.VorfRemove(vorf);
-                // For demo purposes only
-                vorf_tbl.Remove(vorf);
-                // For production
-                //dbContext.SaveChanges();
-                await vorfGrid.Reload();
-            }
-            else
-            {
-                vorfGrid.CancelEditRow(vorf);
-            }
-        }
-
-        VORF vorfToInsert;
-        async Task InsertRow()
-        {
-            vorfToInsert = new VORF();
-            await vorfGrid.InsertRow(vorfToInsert);
-        }
-
-        void OnCreateRow(VORF vorf)
-        {
-            Data.VorfAdd(vorf);
-            // For demo purposes only
-            //vorf.Customer = dbContext.Customers.Find(vorf.CustomerID);
-            //vorf.Employee = dbContext.Employees.Find(vorf.EmployeeID);
-            // For production
-            //dbContext.SaveChanges();
-        }
-#endregion
-
-#region von Sped:
-        protected int count;
-        protected bool isLoading = false;
-        protected int pagesize;  //LNav bzw GNax MaxRecordCount
 
         protected async Task LoadData(LoadDataArgs args)
         {
             isLoading = true;
             await Task.Yield();
+
+            lnav.RefreshAbfrage();  //von FLTR neu einlesen (Columnlist, Fltrlist,..)
 
             //pagesize anpassen falls in GNav/LNav geändert
             pagesize = GNav.MaxRecordCount;
@@ -202,18 +108,51 @@ namespace ZakDAK.Pages
             query.FilterParameters = lnav.FilterParameters;
             Prot.Prot0SL($"Filter:{query.Filter}");
             Prot.Prot0SL($"Filterparameter:{JsonSerializer.Serialize(query.FilterParameters)}");
-            vorf_tbl = Data.VorfQuery(query).ToList();
-            //Idee ohne Data Service: vorf_tbl = lnav.queryList();
+            tbl = Data.EntityQuery<V_LADEZETTEL>(query).ToList();
+            //Idee ohne Data Service: tbl = lnav.queryList();
 
-            count = Data.VorfQueryCount(query);
-            Prot.SMessL($"Loaded. Count: {count}");
+            lnav.Recordcount = Data.EntityQueryCount<V_LADEZETTEL>(query);
+            Prot.SMessL($"Loaded. Count: {lnav.Recordcount}");
 
             isLoading = false;
         }
 
         #endregion
 
-        #region Kommando von GlobalNavigator über GlobalService nach hier
+        #region Insert, Edit, Delete
+
+        V_LADEZETTEL editRec;
+
+        protected override Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                //Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier console
+                LoadBedienerAsync();  //von LocalStorage
+            }
+            return base.OnAfterRenderAsync(firstRender);
+        }
+
+        void EditRow(V_LADEZETTEL vorf)
+        {
+            selectedList = new List<V_LADEZETTEL>() { vorf };
+            editRec = vorf;
+            lnav.PageState = GlobalService.PageState.Single;
+        }
+
+        void SaveRow(V_LADEZETTEL vorf)
+        {
+            lnav.PageState = GlobalService.PageState.Multi;
+        }
+
+        void CancelEdit(V_LADEZETTEL vorf)
+        {
+            lnav.PageState = GlobalService.PageState.Multi;
+        }
+
+        #endregion
+
+        #region Kommando, Polling, Reset
 
         public void RunKommando(int KNr)
         {
@@ -230,6 +169,8 @@ namespace ZakDAK.Pages
                 case GlobalService.KommandoTyp.Refresh:
                     {
                         _ = Reset();
+                        //var vorf = tbl.FirstOrDefault();
+                        //EditRow(vorf);
                         break;
                     }
                 case GlobalService.KommandoTyp.Pagesize:
@@ -243,36 +184,135 @@ namespace ZakDAK.Pages
 
         async Task Reset()
         {
-            //grid.Reset(true);
-            await vorfGrid.Reload();
+            if (grid != null)
+                await grid.Reload();
             //await grid.FirstPage(true);
         }
 
-        #endregion
-
-        void OnSort(DataGridColumnSortEventArgs<VORF> args)
-        {
-            //
-            //bringt EAccess string json = JsonConvert.SerializeObject(args);
-            //bringt auch EAccess string json = System.Text.Json.JsonSerializer.Serialize(args);
-            Prot.SMessL($"OnSort:{args.Column.Property} {args.SortOrder}");
-            var colList = vorfGrid.ColumnsCollection.Where(c => c.SortOrder != null);
-            foreach (var col in colList)
-            {
-                Prot.SMessL($"SortColumn Fld:{col.Property} SortProp:{col.SortProperty} a/d:{col.SortOrder}");
-
-            }
-        }
-
+        public int PollSeconds { get; set; } = 120;
 
         /// <summary>
         /// Daten alle 120s refreshen (Tablet Hofliste)
         /// </summary>
         void Poll()
         {
-            Prot.SMessL("Poll Timer: Reset");
-            _ = Reset();
+            if (lnav.PageState == GlobalService.PageState.Multi)
+            {
+                Prot.SMessL("Poll Timer: Reset");
+                // _ = Reset();
+                RunKommando((int)GlobalService.KommandoTyp.Refresh);
+            }
         }
+
+        void OnSort(DataGridColumnSortEventArgs<V_LADEZETTEL> args)
+        {
+            //bringt EAccess string json = JsonConvert.SerializeObject(args);
+            //bringt auch EAccess string json = System.Text.Json.JsonSerializer.Serialize(args);
+            Prot.SMessL($"OnSort:{args.Column.Property} {args.SortOrder}");
+            var colList = grid.ColumnsCollection.Where(c => c.SortOrder != null);
+            foreach (var col in colList)
+            {
+                Prot.SMessL($"SortColumn Fld:{col.Property} SortProp:{col.SortProperty} a/d:{col.SortOrder}");
+
+            }
+        }
+        #endregion
+
+        #region Single Form
+
+        public class Asws
+        {
+            public string Param { get; set; }
+            public string Value { get; set; }
+            //für Ceckbox:
+            //public bool? this[string index]
+            //{
+            //    get { return index == "J" ? true : index == "N" ? false : null; }
+            //    set { }
+            //}
+        }
+
+        readonly IEnumerable<Asws> aswOK = new Asws[] {
+            new Asws(){ Param = "J", Value = "OK" },
+            new Asws(){ Param = "N", Value = "Nicht OK" } };
+
+        readonly IEnumerable<Asws> aswOKStrich = new Asws[] {
+            new Asws(){ Param = "J", Value = "OK" },
+            new Asws(){ Param = "N", Value = "-" } };
+
+        //readonly Dictionary<string, Asws> aswOK = new()
+        //{
+        //    {"J", new Asws(){ Param = "J", Value = "OK", IsTrue = true } },
+        //    {"N", new Asws(){ Param = "N", Value = "Nicht OK", IsTrue = false } }
+        //};
+
+
+        public void Submit(V_LADEZETTEL arg)
+        {
+            //Speichern;
+            //Data.EntityUpdate<V_LADEZETTEL>(arg);
+            arg.geaendert_von = Bediener;
+            Data.VorfUpdate(arg);
+
+            lnav.PageState = GlobalService.PageState.Multi;
+        }
+
+        void OnInvalidSubmit(FormInvalidSubmitEventArgs args)
+        {
+            //Unable to track an instance of type 'V_LADEZETTEL' because it does not have a primary key. 
+            //Data.Ctx.Entry(editRec).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+        }
+
+        public void Cancel()
+        {
+            lnav.PageState = GlobalService.PageState.Multi;
+            //neu laden (EntityStat geht nicht wg View ohne primary key
+            //RunKommando((int)GlobalService.KommandoTyp.Refresh);
+            var vorfEntry = Data.EntityEntry<V_LADEZETTEL>(editRec);
+            if (vorfEntry.State == EntityState.Modified)
+            {
+                vorfEntry.CurrentValues.SetValues(vorfEntry.OriginalValues);
+                vorfEntry.State = EntityState.Unchanged;
+            }
+
+        }
+
+        #endregion
+
+        #region Bediener       
+
+        [Inject]
+        private ProtectedLocalStorage protectedLocalStorage { get; set; }
+        [Inject]
+        IJSRuntime JS { get; set; }
+        public string Bediener { get; set; } = "";
+
+        public async void LoadBedienerAsync()
+        {
+            Bediener = (await protectedLocalStorage.GetAsync<string>("Bediener")).Value;
+            StateHasChanged();
+        }
+
+        public async void SaveBedienerAsync()
+        {
+            await protectedLocalStorage.SetAsync("Bediener", Bediener);
+        }
+
+
+        private async Task BedienerPrompt()
+        {
+            object[] label = new object[] { "Bediener:", Bediener };
+            Bediener = await JS.InvokeAsync<string>("prompt", label);
+            SaveBedienerAsync();
+        }
+
+        private void Abmelden()
+        {
+            Bediener = "";
+            SaveBedienerAsync();
+        }
+
+        #endregion
 
     }
 }

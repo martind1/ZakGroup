@@ -9,9 +9,12 @@ namespace ZakDAK.Connection.DPE
     public partial class DpeContext : DbContext
     {
         public virtual DbSet<ASWS> ASWS_Tbl { get; set; }
+        public virtual DbSet<DKAT> DKAT_Tbl { get; set; }
         public virtual DbSet<FLTR> FLTR_Tbl { get; set; }
         public virtual DbSet<R_INIT> R_INIT_Tbl { get; set; }
+        public virtual DbSet<VFUE> VFUE_Tbl { get; set; }
         public virtual DbSet<VORF> VORF_Tbl { get; set; }
+        public virtual DbSet<V_LADEZETTEL> V_LADEZETTEL_Tbl { get; set; }
 
         public DpeContext(DbContextOptions<DpeContext> options) : base(options)
         {
@@ -49,6 +52,39 @@ namespace ZakDAK.Connection.DPE
 
                 entity.Property(e => e.ITEM_VALUE)
                     .HasMaxLength(80)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<DKAT>(entity =>
+            {
+                entity.HasKey(e => e.DKAT_NR);
+
+                entity.Property(e => e.DKAT_NR)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.BEMERKUNG)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.DKAT_BEZ)
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.DKAT_DTMBIS).HasColumnType("datetime");
+
+                entity.Property(e => e.DKAT_DTMVON).HasColumnType("datetime");
+
+                entity.Property(e => e.ERFASST_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.ERFASST_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.GEAENDERT_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.GEAENDERT_VON)
+                    .HasMaxLength(30)
                     .IsUnicode(false);
             });
 
@@ -170,6 +206,39 @@ namespace ZakDAK.Connection.DPE
                 entity.Property(e => e.WERT)
                     .IsRequired()
                     .HasMaxLength(255)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<VFUE>(entity =>
+            {
+                entity.HasKey(e => e.VFUE_NR);
+
+                entity.HasIndex(e => e.VFUE_BEZ, "UK_VFUE")
+                    .IsUnique();
+
+                entity.Property(e => e.VFUE_NR).ValueGeneratedNever();
+
+                entity.Property(e => e.BEMERKUNG).HasColumnType("text");
+
+                entity.Property(e => e.ERFASST_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.ERFASST_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.GEAENDERT_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.GEAENDERT_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.GUELTIG_AB).HasColumnType("datetime");
+
+                entity.Property(e => e.GUELTIG_BIS).HasColumnType("datetime");
+
+                entity.Property(e => e.VFUE_BEZ)
+                    .IsRequired()
+                    .HasMaxLength(40)
                     .IsUnicode(false);
             });
 
@@ -461,6 +530,10 @@ namespace ZakDAK.Connection.DPE
                     .HasMaxLength(30)
                     .IsUnicode(false);
 
+                entity.Property(e => e.HOFL_OK)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.IKAR_NR)
                     .HasMaxLength(15)
                     .IsUnicode(false);
@@ -526,6 +599,14 @@ namespace ZakDAK.Connection.DPE
 
                 entity.Property(e => e.PRCO_NR2)
                     .HasMaxLength(11)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PROBENAHME_OK)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PROBE_NR)
+                    .HasMaxLength(10)
                     .IsUnicode(false);
 
                 entity.Property(e => e.PROJEKTNR)
@@ -620,6 +701,565 @@ namespace ZakDAK.Connection.DPE
 
                 entity.Property(e => e.ZUSATZKENNUNG)
                     .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.abgsta)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.adt).HasColumnType("datetime");
+
+                entity.Property(e => e.anh_knz)
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.anh_vanr)
+                    .HasMaxLength(3)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.anl_hnr)
+                    .HasMaxLength(7)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.anl_lnd)
+                    .HasMaxLength(3)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.anl_na1)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.anl_na2)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.anl_ort)
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.anl_plz)
+                    .HasMaxLength(6)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.anl_str)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.arcsta)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.bemerkung)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.bezi_nr)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.bgl_nr)
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.brspnr)
+                    .HasMaxLength(3)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.depo_nr)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.edt).HasColumnType("datetime");
+
+                entity.Property(e => e.ents_nr)
+                    .HasMaxLength(13)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ents_typ)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.erfasst_am).HasColumnType("datetime");
+
+                entity.Property(e => e.erfasst_von)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.erz_hnr)
+                    .HasMaxLength(7)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.erz_lnd)
+                    .HasMaxLength(3)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.erz_na1)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.erz_na2)
+                    .HasMaxLength(35)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.erz_ort)
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.erz_plz)
+                    .HasMaxLength(6)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.erz_str)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ewc_code)
+                    .HasMaxLength(8)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.expsta)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.fahr_knz)
+                    .HasMaxLength(12)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.fahr_vanr)
+                    .HasMaxLength(3)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.fkgru)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.fksor)
+                    .HasMaxLength(22)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.fksta)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ge)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.geaendert_am).HasColumnType("datetime");
+
+                entity.Property(e => e.geaendert_von)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.idknz)
+                    .HasMaxLength(9)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.kata_nr)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.laga_code)
+                    .HasMaxLength(6)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.lityp)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.lort_nr)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ma_srte_nr)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ma_txt)
+                    .HasMaxLength(120)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.mand_nr)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.masta)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.me)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.mod)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.mw_knz)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.mw_nr)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.pe)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.prco_nr)
+                    .HasMaxLength(11)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.sam_knz)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.sogr_nr)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.srte_bez)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.srte_nr)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.sta)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.taspnr)
+                    .HasMaxLength(3)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.vbez_nr)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.zahler)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.zatyp)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<V_LADEZETTEL>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("V_LADEZETTEL");
+
+                entity.Property(e => e.ANL_ADRE)
+                    .HasMaxLength(250)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ANL_BEFNR)
+                    .HasMaxLength(9)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ANNE_NR)
+                    .HasMaxLength(6)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ATm)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.AUVO_ID)
+                    .HasMaxLength(250)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.BUNDESLAND)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CHARGENUMMER)
+                    .HasMaxLength(15)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.DKAT_NR)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EANV_ID)
+                    .HasMaxLength(36)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EANV_KNZ)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EANV_REGISTER)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EANV_SIGNIERT)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EANV_STA)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ENCH_NAME)
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ENTS_ENTS_TYP)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ENTS_LITYP)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ENT_ENTNR)
+                    .HasMaxLength(9)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERZD_HNR)
+                    .HasMaxLength(7)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERZD_LND)
+                    .HasMaxLength(3)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERZD_NA1)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERZD_NA2)
+                    .HasMaxLength(35)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERZD_ORT)
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERZD_PLZ)
+                    .HasMaxLength(6)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERZD_STR)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERZ_ADRE)
+                    .HasMaxLength(250)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ERZ_ERZNR)
+                    .HasMaxLength(9)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ER_ANKAUF)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ER_BEMERKUNG)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ER_ENTSORGUNG)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ER_GEBSONST)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ER_GEBUEHR)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ER_GUTSCHRIFT)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ER_MIETE)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ER_TRANSPORT)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ER_UMLAGE)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ETm)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EWC_BEZ)
+                    .HasMaxLength(254)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EWC_GEFAHR)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FREMD_NR)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FTXT_KUERZEL)
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.HANDEINGABE)
+                    .HasMaxLength(250)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.HOFL_KTRL)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.HOFL_OK)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.KATASTER_BEZ)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.KATASTER_NR)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.KUGR_NR)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LABORANALYSE)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LABOREMAIL)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LAGER_BEMERKUNG).HasColumnType("text");
+
+                entity.Property(e => e.LAGER_BEZ)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LAGER_NR)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LCHA_NR)
+                    .HasMaxLength(15)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LZET)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.MATKENN)
+                    .HasMaxLength(5)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.MKEN_BEZ)
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PAUBER)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PROBENAHME_OK)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PROBE_NR)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PROJEKTNR)
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.REST_ADR_FAHRER)
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.REST_ADR_FIRMA)
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.REST_AUSWEIS)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SATZART)
+                    .HasMaxLength(2)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SENT_BEF)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SENT_BEH)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SENT_ENT)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SENT_ERZ)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SGD_ABD_EIG)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SGD_JBERICHT)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SGD_JBERICHT_K)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SUM_FLAG)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.UEB_NR)
+                    .HasMaxLength(14)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.VERFUELLABSCHNITT)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.VERT_NR)
+                    .HasMaxLength(14)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.VFUE_NR).HasColumnType("numeric(3, 0)");
+
+                entity.Property(e => e.WE)
+                    .HasMaxLength(3)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ZAMITTEL)
+                    .HasMaxLength(1)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ZEITKAT_BEZ)
+                    .HasMaxLength(255)
                     .IsUnicode(false);
 
                 entity.Property(e => e.abgsta)

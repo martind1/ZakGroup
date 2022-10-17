@@ -8,6 +8,7 @@
    "ModelNamespace": "",
    "OutputContextPath": "Connection.DPE",
    "OutputPath": "Entities.DPE",
+   "PreserveCasingWithRegex": true,
    "ProjectRootNamespace": "ZakDAK",
    "Schemas": null,
    "SelectedHandlebarsLanguage": 0,
@@ -15,6 +16,10 @@
    "Tables": [
       {
          "Name": "[dbo].[ASWS]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[DKAT]",
          "ObjectType": 0
       },
       {
@@ -26,8 +31,16 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[VFUE]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[VORF]",
          "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[V_LADEZETTEL]",
+         "ObjectType": 3
       }
    ],
    "UiHint": "BLACKI\\SQLSVR17.depoeur",
@@ -47,5 +60,6 @@
    "UseNodaTime": false,
    "UseNullableReferences": false,
    "UseSchemaFolders": false,
-   "UseSpatial": false
+   "UseSpatial": false,
+   "UseT4": false
 }

@@ -86,35 +86,19 @@ namespace ZakDAK.Data
         
         #region Vorf
 
-        public IQueryable<VORF> VorfQuery(Query query)
-        {
-            var items = Ctx.VORF_Tbl.AsQueryable();
-            if (query != null)
-            {
-                items = (IQueryable<VORF>)QueryableFromQuery(query, items);
-            }
-            return items;
-        }
 
-        public int VorfQueryCount(Query query)
+        public void VorfUpdate(V_LADEZETTEL vorf)
         {
-            var items = Ctx.VORF_Tbl.AsQueryable();
-            //items = items.Include(i => i.Contact);
-            //items = items.Include(i => i.OpportunityStatus);
-            if (query != null)
-            {
-                query.Skip = null;
-                query.Top = null;
-                items = (IQueryable<VORF>)QueryableFromQuery(query, items);
-            }
-            return items.Count();
-        }
+            ////notwendig?Nein Ctx.Update<VORF>(vorf);
+            //Ctx.SaveChanges();
+            Ctx.Database.ExecuteSqlInterpolated($@"Update VORF 
+set [HOFL_KTRL] = {vorf.HOFL_KTRL}, [HOFL_OK] = {vorf.HOFL_OK},
+    [VFUE_NR] = {vorf.VFUE_NR}, [DKAT_NR] = {vorf.DKAT_NR},
+    [PROBENAHME_OK] = {vorf.PROBENAHME_OK}, [geaendert_von] = {vorf.geaendert_von}
+where [VORF_NR] = {vorf.vorf_nr}");
+            //beware Änderungen in Entity verwerfen:
+            //beware Ctx.Entry(vorf).State = Microsoft.EntityFrameworkCore.EntityState.Unchanged;
 
-
-        public void VorfUpdate(VORF vorf)
-        {
-            Ctx.Update<VORF>(vorf);
-            Ctx.SaveChanges();
         }
 
         public EntityEntry<VORF> VorfEntry(VORF vorf)
@@ -148,6 +132,9 @@ namespace ZakDAK.Data
             };
             var items = (IQueryable<FLTR>)QueryableFromQuery(query, Ctx.FLTR_Tbl);
             var fltr = items.FirstOrDefault();
+            //Neuladen erzwingen:
+            if (fltr != null)
+                Ctx.Entry(fltr).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
             return fltr;  //null bei EOF
         }
 

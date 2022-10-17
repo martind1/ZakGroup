@@ -4,10 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2022-09-28-FLTRFrm</Version>
+    <Version>22.10.17-beforeNavlink</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <FileVersion>22.09.28</FileVersion>
-    <AssemblyVersion>22.09.28</AssemblyVersion>
+    <FileVersion>22.10.17</FileVersion>
+    <AssemblyVersion>22.10.17</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -52,10 +52,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Utils\" />
   </ItemGroup>
 
 </Project>

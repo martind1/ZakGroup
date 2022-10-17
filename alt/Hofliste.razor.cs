@@ -22,26 +22,27 @@ using ZakDAK.Data;
 using ZakDAK.Entities.DPE;
 using ZakDAK.Kmp;
 using ZakDAK.Shared;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ZakDAK.Pages
 {
-    public partial class FLTRForm
+    public partial class Hofliste
     {
-        RadzenDataGrid<FLTR> grid;
-        IList<FLTR> tbl;
-        IList<FLTR> selectedList;
-        LocalService<FLTR> lnav;
+        RadzenDataGrid<VORF> grid;
+        IList<VORF> tbl;
+        IList<VORF> selectedList;
+        LocalService<VORF> lnav;
 
         [Parameter]
         public string Abfrage { get; set; } = "Standard";
-        public string formKurz = "FLTR";
+        public string formKurz = "HTTP";
 
         [Inject]
         private GlobalService GNav { get; set; }
         [Inject]
         private ProtService Prot { get; set; }
 
-        public FLTRForm()
+        public Hofliste()
         {
             //GNav ist hier noch null!
             //grid ist hier noch null!
@@ -62,10 +63,10 @@ namespace ZakDAK.Pages
         {
             Prot.SMessL($"Init. Abfrage={Abfrage}");  //hier console!
 
-            lnav = new LocalService<FLTR>(GNav, Data, formKurz, Abfrage)
+            lnav = new LocalService<VORF>(GNav, Data, formKurz, Abfrage)
             {
-                Pagetitle = "Abfragen",
-                References = new FltrList("")
+                Pagetitle = "ZAK Digitale Annahmekontrolle",
+                References = new FltrList("sta=H")
             };
         }
 
@@ -77,6 +78,9 @@ namespace ZakDAK.Pages
 
         #region Demo Inline Insert, Edit, Delete
 
+        VORF vorfToInsert;
+        VORF editRec;
+
         protected override Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
@@ -86,88 +90,100 @@ namespace ZakDAK.Pages
             return base.OnAfterRenderAsync(firstRender);
         }
 
-        async Task EditRow(FLTR fltr)
+        //async Task EditRow(VORF vorf)
+        //{
+        //    await grid.EditRow(vorf);
+        //}
+
+        //async Task SaveRow(VORF vorf)
+        //{
+        //    if (vorf == vorfToInsert)
+        //    {
+        //        vorfToInsert = null;
+        //    }
+
+        //    await grid.UpdateRow(vorf);
+        //}
+
+        void EditRow(VORF vorf)
         {
-            await grid.EditRow(fltr);
+            selectedList = new List<VORF>() { vorf };
+            editRec = vorf;
+            lnav.PageState = GlobalService.PageState.Single;
         }
 
-        void OnUpdateRow(FLTR fltr)
+        void SaveRow(VORF vorf)
         {
-            if (fltr == entityToInsert)
+            lnav.PageState = GlobalService.PageState.Multi;
+        }
+
+        void CancelEdit(VORF vorf)
+        {
+            //if (vorf == vorfToInsert)
+            //{
+            //    vorfToInsert = null;
+            //}
+
+            //grid.CancelEditRow(vorf);
+            //// For production
+            //var vorfEntry = Data.VorfEntry(vorf);
+            //if (vorfEntry.State == EntityState.Modified)
+            //{
+            //    vorfEntry.CurrentValues.SetValues(vorfEntry.OriginalValues);
+            //    vorfEntry.State = EntityState.Unchanged;
+            //}
+            lnav.PageState = GlobalService.PageState.Multi;
+        }
+
+        void OnUpdateRow(VORF vorf)
+        {
+            if (vorf == vorfToInsert)
             {
-                entityToInsert = null;
+                vorfToInsert = null;
             }
 
-            Data.EntityUpdate<FLTR>(fltr);
+            Data.VorfUpdate(vorf);
             // For demo purposes only
-            //fltr.Customer = dbContext.Customers.Find(fltr.CustomerID);
-            //fltr.Employee = dbContext.Employees.Find(fltr.EmployeeID);
+            //vorf.Customer = dbContext.Customers.Find(vorf.CustomerID);
+            //vorf.Employee = dbContext.Employees.Find(vorf.EmployeeID);
             // For production
             //dbContext.SaveChanges();
         }
 
-        async Task SaveRow(FLTR fltr)
+        async Task DeleteRow(VORF vorf)
         {
-            if (fltr == entityToInsert)
+            if (vorf == vorfToInsert)
             {
-                entityToInsert = null;
+                vorfToInsert = null;
             }
 
-            await grid.UpdateRow(fltr);
-        }
-
-        void CancelEdit(FLTR fltr)
-        {
-            if (fltr == entityToInsert)
+            if (tbl.Contains(vorf))
             {
-                entityToInsert = null;
-            }
-
-            grid.CancelEditRow(fltr);
-            // For production
-            var vorfEntry = Data.EntityEntry<FLTR>(fltr);
-            if (vorfEntry.State == EntityState.Modified)
-            {
-                vorfEntry.CurrentValues.SetValues(vorfEntry.OriginalValues);
-                vorfEntry.State = EntityState.Unchanged;
-            }
-        }
-
-        async Task DeleteRow(FLTR fltr)
-        {
-            if (fltr == entityToInsert)
-            {
-                entityToInsert = null;
-            }
-
-            if (tbl.Contains(fltr))
-            {
-                Data.EntityRemove<FLTR>(fltr);
+                Data.VorfRemove(vorf);
                 // For demo purposes only
-                tbl.Remove(fltr);
+                tbl.Remove(vorf);
                 // For production
                 //dbContext.SaveChanges();
                 await grid.Reload();
             }
             else
             {
-                grid.CancelEditRow(fltr);
+                grid.CancelEditRow(vorf);
             }
         }
 
-        FLTR entityToInsert;
         async Task InsertRow()
         {
-            entityToInsert = new FLTR();
-            await grid.InsertRow(entityToInsert);
+            vorfToInsert = new VORF();
+            await grid.InsertRow(vorfToInsert);
         }
 
-        void OnCreateRow(FLTR fltr)
+        void OnCreateRow(VORF vorf)
         {
-            Data.EntityAdd<FLTR>(fltr);
+            Data.VorfAdd(vorf);
             // For demo purposes only
-            //fltr.Customer = dbContext.Customers.Find(fltr.CustomerID);
-            //fltr.Employee = dbContext.Employees.Find(fltr.EmployeeID);
+            //vorf.Customer = dbContext.Customers.Find(vorf.CustomerID);
+            //vorf.Employee = dbContext.Employees.Find(vorf.EmployeeID);
             // For production
             //dbContext.SaveChanges();
         }
@@ -181,6 +197,8 @@ namespace ZakDAK.Pages
         {
             isLoading = true;
             await Task.Yield();
+
+            lnav.RefreshAbfrage();  //von FLTR neu einlesen (Columnlist, Fltrlist,..)
 
             //pagesize anpassen falls in GNav/LNav geändert
             pagesize = GNav.MaxRecordCount;
@@ -199,10 +217,10 @@ namespace ZakDAK.Pages
             query.FilterParameters = lnav.FilterParameters;
             Prot.Prot0SL($"Filter:{query.Filter}");
             Prot.Prot0SL($"Filterparameter:{JsonSerializer.Serialize(query.FilterParameters)}");
-            tbl = Data.EntityQuery<FLTR>(query).ToList<FLTR>();
-            //Idee ohne Data Service: tbl = lnav.queryList(args);
+            tbl = Data.VorfQuery(query).ToList();
+            //Idee ohne Data Service: tbl = lnav.queryList();
 
-            lnav.Recordcount = Data.EntityQueryCount<FLTR>(query);
+            lnav.Recordcount = Data.VorfQueryCount(query);
             Prot.SMessL($"Loaded. Count: {lnav.Recordcount}");
 
             isLoading = false;
@@ -235,23 +253,19 @@ namespace ZakDAK.Pages
                         _ = Reset();
                         break;
                     }
-                case GlobalService.KommandoTyp.Erfass:
-                    {
-                        if (entityToInsert == null)
-                            _ = InsertRow();
-                        break;
-                    }
             }
         }
 
         async Task Reset()
         {
+            //grid.Reset(true);
             await grid.Reload();
+            //await grid.FirstPage(true);
         }
 
         #endregion
 
-        void OnSort(DataGridColumnSortEventArgs<FLTR> args)
+        void OnSort(DataGridColumnSortEventArgs<VORF> args)
         {
             //
             //bringt EAccess string json = JsonConvert.SerializeObject(args);
@@ -271,9 +285,54 @@ namespace ZakDAK.Pages
         /// </summary>
         void Poll()
         {
-            Prot.SMessL("Poll Timer: Reset");
-            _ = Reset();
+            if (lnav.PageState == GlobalService.PageState.Multi)
+            {
+                Prot.SMessL("Poll Timer: Reset");
+                // _ = Reset();
+                RunKommando((int)GlobalService.KommandoTyp.Refresh);
+            }
         }
+
+        #region Single Form
+
+        //public bool? CheckAsw[string param] {
+        //    get { return param == "J" ? true : param == "N" ? false : null; }
+        //}
+        // Ziel: bind=@CheckAsw[@vorf.HOFL_OK]
+        
+
+        public class Asws
+        {
+            public string Param { get; set; }
+            public string Value { get; set; }
+        }
+
+        IEnumerable<Asws> aswOK = new Asws[] {
+            new Asws(){ Param = "J", Value = "OK"},
+            new Asws(){ Param = "N", Value = "Nicht OK"} };
+
+
+        public void Submit(VORF arg)
+        {
+            //Speichern;
+            //Data.EntityUpdate<VORF>(arg);
+            Data.VorfUpdate(arg);
+
+            lnav.PageState = GlobalService.PageState.Multi;
+        }
+
+        void OnInvalidSubmit(FormInvalidSubmitEventArgs args)
+        {
+            Data.Ctx.Entry(editRec).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+        }
+
+        public void Cancel()
+        {
+            lnav.PageState = GlobalService.PageState.Multi;
+            RunKommando((int)GlobalService.KommandoTyp.Refresh);
+        }
+
+        #endregion
 
     }
 }

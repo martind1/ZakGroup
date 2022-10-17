@@ -22,14 +22,19 @@ namespace ZakDAK.Kmp
             DoKommando((int)KTyp);
         }
 
-        public enum StatusTyp
+        public enum DataState
         {
             Inactive, Browse, Edit, Insert, Query
         }
 
-#endregion
+        public enum PageState
+        {
+            Multi, Single
+        }
 
-#region Grid, NavLink
+        #endregion
+
+        #region Grid, NavLink
         //wird nicht benötigt. Jetzt per Kommando Event
         //später: navLink. Ziel: in Page-File: Navlink nl = new NavLink('SPED'), Data von JSON-DB/R_INIT
 
@@ -44,8 +49,10 @@ namespace ZakDAK.Kmp
         }
         #endregion
 
-#region Statustext, Eventconsole
+        #region Statustext, Eventconsole
+
         public bool ShowEventConsole { get; set; } = true;
+
         #endregion
 
         #region pagesize

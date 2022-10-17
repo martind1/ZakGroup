@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ZakDAK.Entities.DPE
 {
-    public partial class VORF
+    public partial class V_LADEZETTEL
     {
         public int? AANL_NR { get; set; }
         public double? EURBRPRS { get; set; }
@@ -24,6 +24,8 @@ namespace ZakDAK.Entities.DPE
         public string mod { get; set; }
         public DateTime? edt { get; set; }
         public DateTime? adt { get; set; }
+        public int? ZEITKAT_NR { get; set; }
+        public string ZEITKAT_BEZ { get; set; }
         public short? fahr_nr { get; set; }
         public string fahr_knz { get; set; }
         public string fahr_vanr { get; set; }
@@ -115,10 +117,6 @@ namespace ZakDAK.Entities.DPE
         public short? KSTE_NR { get; set; }
         public short? KART_NR { get; set; }
         public string WE { get; set; }
-        public string ALT_SRTE_NR { get; set; }
-        public string ALT_SRTE_BEZ { get; set; }
-        public string ALT_MA_SRTE_NR { get; set; }
-        public int? TMP_AANL_NR { get; set; }
         public short? BEZI_KST { get; set; }
         public short? LORT_KST { get; set; }
         public double? KOS_SATZ { get; set; }
@@ -142,90 +140,69 @@ namespace ZakDAK.Entities.DPE
         public string ANL_BEFNR { get; set; }
         public string ERZ_ERZNR { get; set; }
         public string ENT_ENTNR { get; set; }
+        public short? ENCH_POS { get; set; }
         public string ER_TRANSPORT { get; set; }
         public string ER_ENTSORGUNG { get; set; }
         public string ER_GEBUEHR { get; set; }
+        public string ER_GEBSONST { get; set; }
+        public string ER_MIETE { get; set; }
+        public string ER_ANKAUF { get; set; }
+        public string ER_GUTSCHRIFT { get; set; }
+        public string ER_UMLAGE { get; set; }
         public string ER_BEMERKUNG { get; set; }
-        public short? ENCH_POS { get; set; }
         public string LABORANALYSE { get; set; }
-        public string LAGER_NR { get; set; }
+        public string LABOREMAIL { get; set; }
         public string LZET { get; set; }
         public string ENTS_LITYP { get; set; }
-        public string ER_ANKAUF { get; set; }
-        public string LABOREMAIL { get; set; }
+        public double? MEN_KG { get; set; }
+        public double? MEN_TO { get; set; }
+        public string LAGER_NR { get; set; }
+        public double? ENTS_TO { get; set; }
         public string HANDEINGABE { get; set; }
         public string VERT_NR { get; set; }
         public double? VG_BETRAG { get; set; }
         public int? VG_RECH_NR { get; set; }
+        public double EFF_NEPRS { get; set; }
+        public double? EFF_BRPRS { get; set; }
         public string ANNE_NR { get; set; }
         public string AUVO_ID { get; set; }
-        public double? ENTS_TO { get; set; }
         public string DKAT_NR { get; set; }
-        public string ER_GEBSONST { get; set; }
-        public string ER_MIETE { get; set; }
         public string EANV_ID { get; set; }
         public string EANV_STA { get; set; }
         public string EANV_REGISTER { get; set; }
-        public string EWC_GEFAHR { get; set; }
-        public string PAUBER { get; set; }
         public string EANV_SIGNIERT { get; set; }
+        public string EWC_GEFAHR { get; set; }
+        public string EANV_KNZ { get; set; }
+        public decimal? VFUE_NR { get; set; }
+        public int? HAUPT_VORF_NR { get; set; }
+        public string CHARGENUMMER { get; set; }
+        public string LCHA_NR { get; set; }
+        public string HOFL_KTRL { get; set; }
+        public string BUNDESLAND { get; set; }
+        public string PAUBER { get; set; }
         public string SENT_ERZ { get; set; }
         public string SENT_BEF { get; set; }
         public string SENT_ENT { get; set; }
         public string SENT_BEH { get; set; }
-        public string NACHWEISTYP { get; set; }
-        public string IKAR_NR { get; set; }
-        public int? VJOB_ID { get; set; }
-        public int? DABL_ID { get; set; }
-        public string ER_GUTSCHRIFT { get; set; }
-        public double? MEN_KG { get; set; }
-        public double? MEN_TO { get; set; }
-        public int? CHME_NR { get; set; }
-        public string KOLO_NR { get; set; }
-        public int? ABHI_STUFE { get; set; }
         public string PROJEKTNR { get; set; }
-        public double? MEN_STK { get; set; }
-        public double? MEN_M3 { get; set; }
-        public double? MEN_TAG { get; set; }
         public string MATKENN { get; set; }
-        public double? EANV_TO { get; set; }
         public string SGD_ABD_EIG { get; set; }
         public string SGD_JBERICHT { get; set; }
-        public string HKBE_NR { get; set; }
-        public string TOURENART { get; set; }
-        public string SRTE_NR2 { get; set; }
-        public string SRTE_BEZ2 { get; set; }
-        public double? MEN2 { get; set; }
-        public string PE2 { get; set; }
-        public double? EIPRS2 { get; set; }
-        public double? NEPRS2 { get; set; }
-        public double? BRPRS2 { get; set; }
-        public int? ERLKTO2 { get; set; }
-        public short? KSTE_NR2 { get; set; }
-        public string FKSTA2 { get; set; }
-        public int? RECH_NR2 { get; set; }
-        public short? RECH_POS2 { get; set; }
-        public string EXPSTA2 { get; set; }
-        public int? VORF_POS { get; set; }
-        public string ME2 { get; set; }
-        public string EINWAEGER { get; set; }
-        public string PRCO_NR2 { get; set; }
-        public double EFF_NEPRS { get; set; }
-        public double? EFF_BRPRS { get; set; }
-        public string ZUSATZKENNUNG { get; set; }
-        public string ER_UMLAGE { get; set; }
-        public int? ZEITKAT_NR { get; set; }
-        public string ZEITKAT_BEZ { get; set; }
-        public string EANV_KNZ { get; set; }
-        public decimal? VFUE_NR { get; set; }
-        public int? HAUPT_VORF_NR { get; set; }
         public string SGD_JBERICHT_K { get; set; }
-        public string CHARGENUMMER { get; set; }
-        public string BUNDESLAND { get; set; }
-        public string LCHA_NR { get; set; }
-        public string HOFL_KTRL { get; set; }
+        public string LAGER_BEZ { get; set; }
+        public string VERFUELLABSCHNITT { get; set; }
+        public string LAGER_BEMERKUNG { get; set; }
+        public string EWC_BEZ { get; set; }
+        public string ENTS_ENTS_TYP { get; set; }
+        public int? ENTS_ZAH_NR { get; set; }
         public string PROBE_NR { get; set; }
         public string HOFL_OK { get; set; }
         public string PROBENAHME_OK { get; set; }
+        public string ANL_ADRE { get; set; }
+        public string ERZ_ADRE { get; set; }
+        public string MKEN_BEZ { get; set; }
+        public string ENCH_NAME { get; set; }
+        public string KATASTER_NR { get; set; }
+        public string KATASTER_BEZ { get; set; }
     }
 }

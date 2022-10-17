@@ -109,7 +109,7 @@ namespace ZakDAK.Kmp
 
 
         /// <summary>
-        /// Ergibt true bei Native Block idF &amp;{F1=5}
+        /// Ergibt true bei Native Block (mit {} umgeben) idF &amp;{F1=5}
         /// </summary>
         /// <param name="kmpstr"></param>
         /// <returns></returns>
@@ -154,18 +154,21 @@ namespace ZakDAK.Kmp
             string Ausdruck = "";
             string AusdruckGuid = "[a7084c00-748a-41f7-8d24-8c8cc27a2e5d]";
 
-            //Block {} nie umformen
+            //Block {} nie umformen. Bzw ' nach " umsetzen wg Linq
             if (IsNativBlock(kmpstr))
             {
+                result = result.Replace("'", "\""); // {F1='aha'} --> {F1="aha"}
                 return result;
             }
 
             //es ist nur ein [Ausdruck] pro Block möglich. Siehe Ende.
+            //Text innerhaln [] unverändert lassen
             Expression = @"\[(.*?)\]";
             Match m = Regex.Match(result, Expression);
             if (m.Success)
             {
                 Ausdruck = m.Value;  // mit []
+                Ausdruck = Ausdruck.Replace("'", "\""); // [F1+'aha'] --> [F1+"aha"]
                 result = result.Replace(Ausdruck, AusdruckGuid); // [F1]>5 --> [Guid]>5
             }
 
@@ -383,6 +386,7 @@ namespace ZakDAK.Kmp
                 {
                     // {aaa} bleibt unverändert
                     // Standardbehandlung
+                    toki = toki.Replace("'", "\""); // {F1='aha'} --> {F1="aha"}
                     var kmpTokItem = new KmpTokItem
                     {
                         OrFlag = !toki.StartsWith("&"),  //true bei erstem Token ohne &;
