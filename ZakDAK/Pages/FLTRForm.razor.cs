@@ -67,6 +67,7 @@ namespace ZakDAK.Pages
                 Pagetitle = "Abfragen",
                 References = new FltrList("")
             };
+            GNav.SetLNav(lnav);
         }
 
         #region Konfiguration

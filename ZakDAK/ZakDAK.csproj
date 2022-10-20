@@ -4,10 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>22.10.17-beforeNavlink</Version>
+    <Version>22.10.20-Zaktest</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <FileVersion>22.10.17</FileVersion>
-    <AssemblyVersion>22.10.17</AssemblyVersion>
+    <FileVersion>22.10.20</FileVersion>
+    <AssemblyVersion>22.10.20</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -38,14 +38,15 @@ namespace ZakDAK.Kmp
         //wird nicht benötigt. Jetzt per Kommando Event
         //später: navLink. Ziel: in Page-File: Navlink nl = new NavLink('SPED'), Data von JSON-DB/R_INIT
 
-        public LocalService<Object> lnav;
-        public int RecordCount { get; set; } = 0;
-        public string Pagetitle { get; set; }
+        public INavigatorLink lnav;
+        public int RecordCount { get { return (lnav?.Recordcount ?? 0); } set { } }
+        public string Pagetitle { get { return (lnav?.Pagetitle ?? "-"); } set { } }
+        public event Action OnStatusChange;
+        public void StatusChanged() => OnStatusChange?.Invoke();
 
-        public void SetLNav<T>(Object ln)
+        public void SetLNav(INavigatorLink ln)
         {
-            //EntityType = typeof(T);
-            lnav = (LocalService<Object>)ln;
+            lnav = ln;
         }
         #endregion
 

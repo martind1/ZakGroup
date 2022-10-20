@@ -1,7 +1,9 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json.Linq;
 using System.Collections;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
+using System.Reflection.Metadata;
 using ZakDAK.Entities.DPE;
 
 namespace ZakDAK.Kmp
@@ -38,20 +40,42 @@ namespace ZakDAK.Kmp
             }
         }
 
-        //Fieldliste einer Entity. Mit FieldInfos.
+        //Fieldliste einer Entity. Mit FieldInfos. Mit Formatstrings von Formatlist (wenn vorhanden)
         public static IDictionary<string, FieldInfo> GetFieldlist(Type TEntity)
         {
             PropertyInfo[] propertyInfos;
             propertyInfos = TEntity.GetProperties();  // BindingFlags.Public);
 
-            // write property names
-            var fieldlist = new Dictionary<string, FieldInfo>();
-            foreach (PropertyInfo propertyInfo in propertyInfos)
+            // Formatlist laden:
+            string constFormatlist = "Formatlist";
+            bool hasFormatlist = propertyInfos.Where(x => x.Name == constFormatlist).FirstOrDefault() != null;
+            var formatlist = new Dictionary<string, string>();
+            if (hasFormatlist)
             {
-                //keine erweiterten Felder
-                if (propertyInfo.SetMethod != null)
-                    fieldlist.Add(propertyInfo.Name, new FieldInfo(propertyInfo.PropertyType));
+                var entity = Activator.CreateInstance(TEntity, true);
+                var s1 = entity.GetType().GetProperty(constFormatlist).GetValue(entity, null);
+                var helplist = (Dictionary<string, string>)s1;
+                //Anlegen case insensitiv:
+                foreach (var item in helplist)
+                    formatlist.Add(item.Key.ToUpper(), item.Value);
             }
+
+            // write fieldlist
+            // nur Felder mit Getter und Setter (auch [NotMapped])
+            var fieldlist = new Dictionary<string, FieldInfo>();
+            foreach (PropertyInfo propertyInfo in propertyInfos.
+                Where(p => p.GetGetMethod() != null && p.GetSetMethod() != null))
+            {
+                string formatstring = "";
+                //Vergleichen case insensitiv:
+                if (hasFormatlist && formatlist != null)
+                    formatlist.TryGetValue(propertyInfo.Name.ToUpper(), out formatstring);
+
+                fieldlist.Add(propertyInfo.Name, new FieldInfo(propertyInfo.PropertyType, formatstring));
+            }
+
+            // Fieldinfo.Formatstring befüllen:
+
             return fieldlist;
         }
 
@@ -64,8 +88,92 @@ namespace ZakDAK.Kmp
 
     }
 
+    [Flags]
+    public enum FormatOptions
+    {
+        alNone = 0,
+        alRight = 1,          // r,  RzTextAlign := taRightJustify
+        alLeft = 2,           // l,  RzTextAlign := taLeftJustify
+        alCenter = 4,         // c,  RzTextAlign := taCenter
+        alIgnoreName = 8,     //IGN, Fehlenden Feldnamen ignorieren
+        alAutoGenerate = 16,  //A,   vom Server verwalteter Vorgabewert
+        alRequired = 32,      //N,   Mussfeld
+        alReadOnly = 64,      //R,   Nur-Lesen Feld
+        alInternalCalc = 128, //C,   Feld wird in der Datenbank berechnet (nicht in DB speichern)
+        alInt = 256,          //INT, Werte in Sql als Integer formatieren (statt string)->sql: F=12->(int)F=12
+        alTrimLeft0 = 512,    //TL0, 0en links weg
+        alAsw = 1024,         //ASW,<a>  a=Auswahlname  
+    }
+
     public class FieldInfo
     {
+        private string _formatstring;
+        public FormatOptions Options;
+        public string AswName;
+        public string Formatstring { 
+            get => _formatstring;
+            set
+            {
+                // bestimmt _formatstring, Options und AswName:
+                Options = FormatOptions.alNone;
+                AswName = "";
+                _formatstring = "";
+                if (!string.IsNullOrEmpty(value))
+                {
+                    var fl = value.Split(",");
+                    for (int i = 0; i < fl.Length; i++)
+                    {
+                        switch (fl[i])
+                        {
+                            case "r":
+                                Options |= FormatOptions.alRight;
+                                break;
+                            case "l":
+                                Options |= FormatOptions.alLeft;
+                                break;
+                            case "c":
+                                Options |= FormatOptions.alCenter;
+                                break;
+                            case "IGN":
+                                Options |= FormatOptions.alIgnoreName;
+                                break;
+                            case "A":
+                                Options |= FormatOptions.alAutoGenerate;
+                                break;
+                            case "N":
+                                Options |= FormatOptions.alRequired;
+                                break;
+                            case "R":
+                                Options |= FormatOptions.alReadOnly;
+                                break;
+                            case "C":
+                                Options |= FormatOptions.alInternalCalc;
+                                break;
+                            case "INT":
+                                Options |= FormatOptions.alInt;
+                                break;
+                            case "TL0":
+                                Options |= FormatOptions.alTrimLeft0;
+                                break;
+                            case "ASW":
+                                Options |= FormatOptions.alAsw;
+                                AswName = fl[++i];
+                                break;
+                            default:
+                                _formatstring = string.Join(",", fl[i..]);
+                                i = fl.Length;  //Ende
+                                break;
+                        }
+                    }
+                    if (_formatstring != null)
+                        if (!_formatstring.StartsWith("{"))  //0.00 -> {0:0.00} wg string.Format(FormatString, value,
+                            _formatstring  = "{0:" + _formatstring + "}";
+                }
+
+            }
+        }
+
+        public FieldType fieldType { get; set; }
         private Type _propertyType;
         public Type PropertyType
         {
@@ -100,11 +208,11 @@ namespace ZakDAK.Kmp
 
             }
         }
-        public FieldType fieldType { get; set; }
 
-        public FieldInfo(Type propertyType)
+        public FieldInfo(Type propertyType, string formatstring)
         {
             PropertyType = propertyType;
+            Formatstring = formatstring;
         }
     }
 

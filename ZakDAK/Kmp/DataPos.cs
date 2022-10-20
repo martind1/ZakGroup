@@ -1,4 +1,5 @@
 ﻿using NuGet.Protocol;
+using Radzen;
 using Serilog;
 using System.Security.Policy;
 
@@ -9,12 +10,19 @@ namespace ZakDAK.Kmp
     // FltrList: Metadaten für Suchkriterien / .where
     // SqlFieldList: Metadaten für Feldliste / .insert
 
-#region ColumnList
+    #region ColumnList
     //ColumnList: Verbindung zur KMP Welt. Für Grid Columns
     //15.09.22 md  Columns als IList ausgeprägt um nach ColIndex zu sortieren
+    //20.10.22 md  Array-Property ergibt ColumnListItem
     public class ColumnList
     {
         public IList<ColumnListItem> Columns { get; set; }
+
+        // Zugriff per lnav.Columnlist[<Feldname]
+        public ColumnListItem this[string index]
+        {
+            get { return Columns.Where(c => c.Fieldname == index).FirstOrDefault(); }
+        }
 
         public IList<ColumnListItem> SortedColumns
         {
@@ -106,8 +114,13 @@ namespace ZakDAK.Kmp
             }
         }
         public ColumnListItemFlags Flags { get; set; }
+
         //wird nachträglich ausgefüllt: (asc, desc, ""/null) für razor
         public Radzen.SortOrder? SortOrder { get; set; }
+        //wird anhand FieldType und Formatlist ausgefüllt
+        public string FormatString;  //zB "{0:d}"
+        public TextAlign RzTextAlign;
+        public string SingleStyle;  //für Textbox, Numeric
 
 
         //Spalte anhand KMP Beschreibung anlegen idF <Display>:<Width>,<[Option]*>=<Fieldname>
@@ -160,18 +173,21 @@ namespace ZakDAK.Kmp
         public FltrList(string fltrlist) : this()
         {
             //fltrlist Zeile idF <FieldName>=<Suchkriterien>
-            List<string> list = new(
-                fltrlist.Split(new string[] { "\r\n", "\n", "\r" },
-                StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-            foreach (var s in list)
+            if (fltrlist != null)
             {
-                if (!s.StartsWith(";"))
+                List<string> list = new(
+                    fltrlist.Split(new string[] { "\r\n", "\n", "\r" },
+                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+                foreach (var s in list)
                 {
-                    var SL = s.Split2("=");  //beware ANL_NA1=AGH%;=
-                    if (SL.Length >= 2 && !String.IsNullOrEmpty(SL[1]))
+                    if (!s.StartsWith(";"))
                     {
-                        var fli = new FltrListItem(SL[0], SL[1]);
-                        Fltrs.Add(fli);
+                        var SL = s.Split2("=");  //beware ANL_NA1=AGH%;=
+                        if (SL.Length >= 2 && !String.IsNullOrEmpty(SL[1]))
+                        {
+                            var fli = new FltrListItem(SL[0], SL[1]);
+                            Fltrs.Add(fli);
+                        }
                     }
                 }
             }

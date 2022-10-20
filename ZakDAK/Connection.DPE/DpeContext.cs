@@ -682,8 +682,6 @@ namespace ZakDAK.Connection.DPE
                     .HasMaxLength(14)
                     .IsUnicode(false);
 
-                entity.Property(e => e.VFUE_NR).HasColumnType("numeric(3, 0)");
-
                 entity.Property(e => e.WE)
                     .HasMaxLength(3)
                     .IsUnicode(false);
@@ -1247,8 +1245,6 @@ namespace ZakDAK.Connection.DPE
                 entity.Property(e => e.VERT_NR)
                     .HasMaxLength(14)
                     .IsUnicode(false);
-
-                entity.Property(e => e.VFUE_NR).HasColumnType("numeric(3, 0)");
 
                 entity.Property(e => e.WE)
                     .HasMaxLength(3)

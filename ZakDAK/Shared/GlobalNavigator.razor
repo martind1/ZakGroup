@@ -64,6 +64,7 @@
     protected override void OnInitialized()
     {
         Prot.OnStatusTextChange += StateHasChanged;  //build-in:Refresh
+        GNav.OnStatusChange += StateHasChanged;  //build-in:Refresh
     }
 
     void OnEventConsole(bool value, string name)
@@ -76,5 +77,5 @@
     {
         GNav.MaxRecordCount = GNav.MaxRecordCountValues[value.ToString()];
     }
-    
+
 }

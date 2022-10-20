@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 using ZakDAK.Entities.DPE;
 
 namespace ZakDAK.Connection.DPE
@@ -7,24 +10,33 @@ namespace ZakDAK.Connection.DPE
     {
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
         {
+            #region Bulk configuration via model class for all table names
+            foreach (IMutableEntityType entity in modelBuilder.Model.GetEntityTypes())
+            {
+                // All table names = class names (~ EF 6.x),
+                // except the classes that have a [Table] annotation or derived classes (where ToTable() is not allowed in EF Core >= 3.0)
+                var annotation = entity.ClrType?.GetCustomAttribute<TableAttribute>();
+                if (annotation == null && entity.BaseType == null)
+                {
+                    entity.SetTableName(entity.DisplayName());
+                }
+            }
+            #endregion
+
+            /* abgelöst s.o.:
             // weil sonst Tablename='VORF_Tbl' !?!
             modelBuilder.Entity<VORF>(entity => entity.ToTable("VORF"));
-
             modelBuilder.Entity<FLTR>(entity => entity.ToTable("FLTR"));
-
             modelBuilder.Entity<ASWS>(entity => entity.ToTable("ASWS"));
-
             modelBuilder.Entity<R_INIT>(entity => entity.ToTable("R_INIT"));
-
             modelBuilder.Entity<V_LADEZETTEL>(entity => entity.ToTable("V_LADEZETTEL"));
-            modelBuilder.Entity<V_LADEZETTEL>(entity =>
-                entity.HasKey(e => e.vorf_nr));
-            //.HasName("PK_NEUVORF")
-            //.IsClustered(false));
-
             modelBuilder.Entity<DKAT>(entity => entity.ToTable("DKAT"));
             modelBuilder.Entity<VFUE>(entity => entity.ToTable("VFUE"));
+            */
 
+            //Realisierung änderbarer View:
+            modelBuilder.Entity<V_LADEZETTEL>(entity =>
+                entity.HasKey(e => e.vorf_nr));
 
             /* Precision:
             modelBuilder.Entity<VORF>(entity =>

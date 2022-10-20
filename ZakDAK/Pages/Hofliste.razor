@@ -9,10 +9,12 @@
 @using ZakDAK.Entities.DPE
 @using Serilog;
 @using Utils;
+@using ZakDAK.Kmp
+
 
 @* if (FullScreen)
-    @layout EmptyLayout
 *@
+@layout EmptyLayout
 <style>
     .valid.modified:not([type=checkbox]) {
         outline-style: none;
@@ -90,8 +92,14 @@
             </RadzenDataGridColumn>
             @foreach (var col in lnav.Columnlist.SortedColumns)
             {
-                <RadzenDataGridColumn TItem="V_LADEZETTEL" Property="@col.Fieldname" Title="@col.DisplayLabel"
-                                      Width="@col.WidthPx" Visible="@col.IsVisible" SortOrder="@col.SortOrder" />
+                <RadzenDataGridColumn TItem="V_LADEZETTEL"
+                                      Property="@col.Fieldname"
+                                      Title="@col.DisplayLabel"
+                                      Width="@col.WidthPx"
+                                      Visible="@col.IsVisible"
+                                      SortOrder="@col.SortOrder"
+                                      TextAlign="@col.RzTextAlign"
+                                      FormatString="@col.FormatString" />
             }
         </Columns>
     </RadzenDataGrid>
@@ -111,7 +119,7 @@
                             </div>
                             <div class="col-md-9">
                                 <RadzenSelectBar TValue="string" Name="HOFL_OK" @bind-Value=editRec.HOFL_OK
-                                                 Data="@aswOK" TextProperty="Value" ValueProperty="Param">
+                                                 Data="@Auswahl.aswOK" TextProperty="Value" ValueProperty="Param">
                                 </RadzenSelectBar>
                                 <RadzenRequiredValidator Component="HOFL_OK" Text="Quittierung fehlt" />
                             </div>
@@ -127,14 +135,64 @@
                                 <RadzenLabel Text="Verfüllabschnitt" />
                             </div>
                             <div class="col-md-9">
-                                <RadzenNumeric TValue="decimal?" Name="VFUE_NR" @bind-Value="editRec.VFUE_NR" />
+                                <RadzenDropDownDataGrid TValue="string"
+                                                        @ref="cobVFUE"
+                                                        LoadData=@LuVFUE.LoadData
+                                                        AllowFiltering="false"
+                                                        @bind-Value="editRec.cfVFUE_NR"
+                                                        Data=@LuVFUE.tbl
+                                                        Count=@LuVFUE.Recordcount
+                                                        TextProperty="cfVFUE_NR"
+                                                        ValueProperty="cfVFUE_NR"
+                                                        AllowSorting="true"
+                                                        AllowColumnResize="true"
+                                                        Class="w-100">
+                                    <Columns>
+                                        @foreach (var col in LuVFUE.Columnlist.SortedColumns)
+                                        {
+                                            <RadzenDropDownDataGridColumn Property="@col.Fieldname"
+                                                                          Title="@col.DisplayLabel"
+                                                                          Width="@col.WidthPx"
+                                                                          Visible="@col.IsVisible"
+                                                                          FormatString="@col.FormatString"
+                                                                          SortOrder="@col.SortOrder" />
+                                        }
+                                    </Columns>
+                                </RadzenDropDownDataGrid>
                             </div>
 
                             <div class="col-md-3 align-items-center d-flex">
                                 <RadzenLabel Text="Deponiekataster" />
                             </div>
                             <div class="col-md-9">
-                                <RadzenTextBox class="w-100" Name="DKAT_NR" @bind-Value="editRec.DKAT_NR" />
+                                @*<RadzenTextBox class="w-100" Name="DKAT_NR" @bind-Value="editRec.DKAT_NR" />
+                                *@
+                                <RadzenDropDownDataGrid TValue="string"
+                                                        @ref="cobDKAT"
+                                                        LoadData=@LuDKAT.LoadData
+                                                        AllowFiltering="false"
+                                                        @bind-Value="editRec.DKAT_NR"
+                                                        Data=@LuDKAT.tbl
+                                                        Count=@LuDKAT.Recordcount
+                                                        TextProperty="DKAT_NR"
+                                                        ValueProperty="DKAT_NR"
+                                                        AllowSorting="true"
+                                                        AllowColumnResize="true"
+                                                        AllowVirtualization="@LuDKAT.Virtualization"
+                                                        Class="w-100">
+                                    <Columns>
+                                        @foreach (var col in LuDKAT.Columnlist.SortedColumns)
+                                        {
+                                            <RadzenDropDownDataGridColumn Property="@col.Fieldname"
+                                                                          Title="@col.DisplayLabel"
+                                                                          Width="@col.WidthPx"
+                                                                          Visible="@col.IsVisible"
+                                                                          FormatString="@col.FormatString"
+                                                                          SortOrder="@col.SortOrder" />
+                                        }
+                                    </Columns>
+                                </RadzenDropDownDataGrid>
+
                             </div>
 
                             <div class="col-md-3 align-items-center d-flex">
@@ -142,7 +200,7 @@
                             </div>
                             <div class="col-md-4">
                                 <RadzenSelectBar TValue="string" Name="PROBENAHME_OK" @bind-Value=editRec.PROBENAHME_OK
-                                                 Data="@aswOKStrich" TextProperty="Value" ValueProperty="Param">
+                                                 Data="@Auswahl.aswOKStrich" TextProperty="Value" ValueProperty="Param">
                                 </RadzenSelectBar>
                                 @if (!string.IsNullOrEmpty(editRec.PROBE_NR))
                                 {
@@ -171,15 +229,18 @@
                                 <RadzenLabel Text="Fahrzeug, Brutto, Tara" />
                             </div>
                             <div class="col-md-5">
-                                <RadzenTextBox class="w-100" ReadOnly="true" Name="FAHR_KNZ" @bind-Value="editRec.fahr_knz" />
+                                <RadzenTextBox class="w-100" ReadOnly="true" Name="FAHR_KNZ" @bind-Value="editRec.fahr_knz" 
+                                               Style="@lnav.Columnlist["fahr_knz"].SingleStyle" />
                             </div>
                             <div class="col-md-2">
                                 <RadzenNumeric class="w-100" ReadOnly="true" Name="BRGEW" @bind-Value="editRec.brgew"
-                                               TValue="double?" ShowUpDown="false" />
+                                               TValue="double?" ShowUpDown="false"
+                                               Style="@lnav.Columnlist["brgew"].SingleStyle" />
                             </div>
                             <div class="col-md-2">
                                 <RadzenNumeric class="w-100" ReadOnly="true" Name="TAGEW" @bind-Value="editRec.tagew"
-                                               TValue="double?" ShowUpDown="false" />
+                                               TValue="double?" ShowUpDown="false"
+                                               Style="@lnav.Columnlist["tagew"].SingleStyle" />
                             </div>
                         </div>
 
@@ -193,6 +254,7 @@
                             <div class="col-md-2">
                                 <RadzenTextBox class="w-100" ReadOnly="true" Name="ETm" @bind-Value="editRec.ETm" />
                             </div>
+                            @lnav.Columnlist["tagew"].SingleStyle
                         </div>
 
                         <div class="form-row">

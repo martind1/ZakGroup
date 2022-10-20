@@ -173,7 +173,7 @@ namespace ZakDAK.Entities.DPE
         public string EANV_SIGNIERT { get; set; }
         public string EWC_GEFAHR { get; set; }
         public string EANV_KNZ { get; set; }
-        public decimal? VFUE_NR { get; set; }
+        public short? VFUE_NR { get; set; }
         public int? HAUPT_VORF_NR { get; set; }
         public string CHARGENUMMER { get; set; }
         public string LCHA_NR { get; set; }

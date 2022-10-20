@@ -2,6 +2,7 @@
 @using Serilog;
 @using Serilog.Events
 @using System.Text.RegularExpressions
+@using ZakDAK.Kmp
 
 <PageTitle>Counter</PageTitle>
 
@@ -11,9 +12,10 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-<br/><br/>
+<br />
+<br />
 <RadzenButton Click="@ButtonClicked" Text=@radzenText />
-<br/>
+<br />
 <RadzenTextBox @bind-Value=@radzenText />
 
 <br />
@@ -34,7 +36,7 @@
         <RadzenTextBox style="width: 100%;" @bind-Value=@Beispiel />
     </div>
 </div>
-<div >
+<div>
     <RadzenButton Click="@RegexClicked" Text="Regex.Match" />
     <RadzenButton Click="@ReplaceClicked" Text="Regex.Replace" />
     <RadzenTextBox style="width: 50%;" @bind-Value=@Replace />
@@ -108,5 +110,18 @@
         }
     }
 
+    #endregion
+
+    #region Navigator
+    [Inject]
+    private GlobalService GNav { get; set; }
+    LocalService<DummyEntity> lnav;
+
+    protected override void OnParametersSet()
+    {
+        lnav = new LocalService<DummyEntity>(GNav);
+        GNav.SetLNav(lnav);
+        lnav.Pagetitle = "Zähler und RegEx";  //erst hier wg Benachrichtigung
+    }
     #endregion
 }

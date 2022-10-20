@@ -151,8 +151,21 @@ namespace ZakDAK.Kmp
             string Expression;
             string Replacement;
 
-            string Ausdruck = "";
-            string AusdruckGuid = "[a7084c00-748a-41f7-8d24-8c8cc27a2e5d]";
+            const int MAX_AUSDRUCK = 10;
+            string[] Ausdruck = new string[MAX_AUSDRUCK];
+            string[] AusdruckGuid = new string[MAX_AUSDRUCK]
+            {
+                "a7084c00-748a-41f7-8d24-8c8cc27a2e5d",
+                "df42a913-c5fc-489f-afdd-cb31707e947c",
+                "d40bf98e-cb51-41f5-aa8b-a00a5ca49af0",
+                "4dbf6e4b-b724-4c5c-a481-600d2606635c",
+                "86b9e5b4-7208-4f70-8982-110e61a6bde3",
+                "4705c122-c2f7-44d4-840a-6df1847a0795",
+                "187281c0-cb62-4f31-82af-32511111c3a0",
+                "fce1b347-8aa7-4bd4-a942-8d93cfb65c55",
+                "ded3d14c-58ac-44c5-946a-c1880dcce47c",
+                "cde0ac98-fef5-4451-a32e-31970a85d07e",
+            };
 
             //Block {} nie umformen. Bzw ' nach " umsetzen wg Linq
             if (IsNativBlock(kmpstr))
@@ -161,17 +174,25 @@ namespace ZakDAK.Kmp
                 return result;
             }
 
-            //es ist nur ein [Ausdruck] pro Block möglich. Siehe Ende.
+            // 'sysdate', 'heute', 'today' -> [DateTime.Now]
+            if (!result.Contains("[sysdate", StringComparison.OrdinalIgnoreCase))
+                result = result.Replace("sysdate", "[DateTime.Now.Date]", StringComparison.OrdinalIgnoreCase);
+            result = result.Replace("heute", "[DateTime.Now.Date]", StringComparison.OrdinalIgnoreCase);
+            result = result.Replace("today", "[DateTime.Now.Date]", StringComparison.OrdinalIgnoreCase);
+
+            //es sind nur 10 [Ausdruck]e pro Block möglich. Siehe Ende.
             //Text innerhaln [] unverändert lassen
             Expression = @"\[(.*?)\]";
-            Match m = Regex.Match(result, Expression);
-            if (m.Success)
+            for (int i = 0; i < MAX_AUSDRUCK; i++)
             {
-                Ausdruck = m.Value;  // mit []
-                Ausdruck = Ausdruck.Replace("'", "\""); // [F1+'aha'] --> [F1+"aha"]
-                result = result.Replace(Ausdruck, AusdruckGuid); // [F1]>5 --> [Guid]>5
+                Match m = Regex.Match(result, Expression);
+                if (m.Success)
+                {
+                    Ausdruck[i] = m.Value;  // mit []
+                    Ausdruck[i] = Ausdruck[i].Replace("'", "\""); // [F1+'aha'] --> [F1+"aha"]
+                    result = result.Replace(Ausdruck[i], AusdruckGuid[i]); // [F1]>5 --> [Guid]>5
+                }
             }
-
 
             // fester Bereich: {fester Block} -> {F1 like "%abc%" or F1 is null} 
             // fester Bereich: [Fester Ausdruck] -> [TARA * 0.05]
@@ -235,9 +256,12 @@ namespace ZakDAK.Kmp
             Replacement = @"$1%";
             result = Regex.Replace(result, Expression, Replacement); // abc* -> abc%
 
-            if (Ausdruck != "")
+            for (int i = 0; i < MAX_AUSDRUCK; i++)
             {
-                result = result.Replace(AusdruckGuid, Ausdruck);
+                if (Ausdruck[i] != "")
+                {
+                    result = result.Replace(AusdruckGuid[i], Ausdruck[i]);
+                }
             }
             
             return result;

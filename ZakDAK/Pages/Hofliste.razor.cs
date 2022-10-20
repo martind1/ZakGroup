@@ -53,8 +53,8 @@ namespace ZakDAK.Pages
         protected bool isLoading = false;
         protected int pagesize;  //LNav bzw GNax MaxRecordCount
 
-        bool Fullscreen = false; //hier setzen!
-        string gridStyle;
+        readonly bool Fullscreen = true; //hier setzen!
+        readonly string gridStyle;
 
         public Hofliste()
         {
@@ -62,7 +62,7 @@ namespace ZakDAK.Pages
             //grid ist hier noch null!
             gridStyle = Fullscreen ?
                 "height: 100vh; width: 100vw; " :
-                "height: 50vh; width: calc(100vw - 250px);";
+                "height: calc(100vh - 180px - 55px); width: calc(100vw - 250px);";
         }
 
         protected override void OnInitialized()
@@ -82,6 +82,8 @@ namespace ZakDAK.Pages
                 Pagetitle = "ZAK Digitale Annahmekontrolle",
                 References = new FltrList("sta=H"),
             };
+            GNav.SetLNav(lnav);
+            InitLookUp();
         }
 
         protected async Task LoadData(LoadDataArgs args)
@@ -220,26 +222,6 @@ namespace ZakDAK.Pages
 
         #region Single Form
 
-        public class Asws
-        {
-            public string Param { get; set; }
-            public string Value { get; set; }
-            //für Ceckbox:
-            //public bool? this[string index]
-            //{
-            //    get { return index == "J" ? true : index == "N" ? false : null; }
-            //    set { }
-            //}
-        }
-
-        readonly IEnumerable<Asws> aswOK = new Asws[] {
-            new Asws(){ Param = "J", Value = "OK" },
-            new Asws(){ Param = "N", Value = "Nicht OK" } };
-
-        readonly IEnumerable<Asws> aswOKStrich = new Asws[] {
-            new Asws(){ Param = "J", Value = "OK" },
-            new Asws(){ Param = "N", Value = "-" } };
-
         //readonly Dictionary<string, Asws> aswOK = new()
         //{
         //    {"J", new Asws(){ Param = "J", Value = "OK", IsTrue = true } },
@@ -266,7 +248,7 @@ namespace ZakDAK.Pages
         public void Cancel()
         {
             lnav.PageState = GlobalService.PageState.Multi;
-            //neu laden (EntityStat geht nicht wg View ohne primary key
+            //neu laden (EntityStat geht nicht wg View ohne primary key -> haskey()
             //RunKommando((int)GlobalService.KommandoTyp.Refresh);
             var vorfEntry = Data.EntityEntry<V_LADEZETTEL>(editRec);
             if (vorfEntry.State == EntityState.Modified)
@@ -274,7 +256,30 @@ namespace ZakDAK.Pages
                 vorfEntry.CurrentValues.SetValues(vorfEntry.OriginalValues);
                 vorfEntry.State = EntityState.Unchanged;
             }
+        }
 
+        #endregion
+
+        #region LookUp
+
+        LookupDef<VFUE> LuVFUE;
+        RadzenDropDownDataGrid<string> cobVFUE;
+
+        LookupDef<DKAT> LuDKAT;
+        RadzenDropDownDataGrid<string> cobDKAT;
+
+        void InitLookUp()
+        {
+            LuVFUE = new LookupDef<VFUE>(GNav, Data, Prot, "VFUE", "LOOKUP")
+            {
+                References = new FltrList("VFUE_NR=:VFUE_NR"),
+            };
+
+            LuDKAT = new LookupDef<DKAT>(GNav, Data, Prot, "DKAT", "LOOKUP")
+            {
+                References = new FltrList("DKAT_NR=:DKAT_NR"),
+                Virtualization = true,
+            };
         }
 
         #endregion

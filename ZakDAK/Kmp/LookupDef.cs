@@ -5,7 +5,9 @@ using NuGet.Protocol;
 using Radzen;
 using Radzen.Blazor;
 using System.Drawing.Drawing2D;
+using System.Drawing.Printing;
 using System.Security.Policy;
+using System.Text.Json;
 using ZakDAK.Data;
 using ZakDAK.Entities.DPE;
 using static ZakDAK.Kmp.DposUtils;
@@ -13,138 +15,64 @@ using static ZakDAK.Kmp.DposUtils;
 namespace ZakDAK.Kmp
 {
 
-    //Der lokale Navigator
-    public class LocalService<TItem>: INavigatorLink
+    //Lookup Definition
+    public class LookupDef<TItem>: NavigatorLink<TItem>
         where TItem : class
     {
-        //hier kein Inject !! (GNav, DpeData, Prots usw) -->von Page übergeben ->später:GNav als Singleton anlegen!!!
-
-        //todo: nach NLnk - NavigatorLink - LinkService
-        //Idee: hier auch individueller MaxRecordCount
-        private ColumnList _columnlist;
-        public ColumnList Columnlist {
-            get { 
-                _columnlist ??= LoadColumnlist();
-                LoadKeyFields();  //hier wg überschreibt Columnlist
-                return _columnlist;
-            }
-            set => _columnlist = value; 
-        }
-        private string _keyfields;
-        public string KeyFields { get => _keyfields ??= LoadKeyFields(); set => _keyfields = value; }
+        public ColumnList Columnlist { get; set; }
+        public string KeyFields { get; set; }
         public string OrderBy { get; set; }  //von Radzen.LoadDataArgs
-        private FltrList _fltrlist;
-        public FltrList Fltrlist { get => _fltrlist ??= LoadFltrlist(); set => _fltrlist = value; }
+        public FltrList Fltrlist { get; set; }
         public FltrList References { get; set; }  //nicht durch User änderbar
-
 
         //Liste mit Original Feldnamen (Groß/Kleinschreibung). Lazy Loading.
         private IDictionary<string, FieldInfo> _entityFieldlist;
-        public IDictionary<string, FieldInfo> EntityFieldlist { 
+        public IDictionary<string, FieldInfo> EntityFieldlist
+        {
             get => _entityFieldlist ??= GetFieldlist(typeof(TItem));
-            set => _entityFieldlist = value; }
+            set => _entityFieldlist = value;
+        }
 
         protected DpeData data;
-        private FLTR _fltrRec;  //Datensatz aus Tabelle 'FLTR'
-        public FLTR FltrRec { get => _fltrRec ??= data.GetFltr(FormKurz, Abfrage); }
-
-
-        private string _abfrage;
-        public string Abfrage { get => _abfrage; set => SetAbfrage(value); }
-
-        //Bei neuer Abfrage Metadaten neu einlesen
-        public void SetAbfrage(string value)
-        {
-            var oldAbfrage = _abfrage;
-            _abfrage = value;
-            //wenn Abfrage entfernt wird dann Rest nicht entfernen.
-            //Abfrage wird entfernt bei User-Änderungen bzgl Filter,Sort,Columns
-            if (!String.IsNullOrEmpty(value) && (oldAbfrage ?? string.Empty) != value) {
-                //s.o. _abfrage = value;
-                RefreshAbfrage();
-            }
-        }
-
-        //erzwingt Neueinlesen von FLTR Tabelle
-        public void RefreshAbfrage()
-        {
-            _fltrRec = null; //neu Laden von Abfrage
-            _columnlist = null; //neu Laden von Abfrage
-            _keyfields = null; //neu Laden von Abfrage
-            _fltrlist = null; //neu Laden von AbfrageLoadFltrlist();
-        }
-        private string _formKurz;
-        public string FormKurz { get => _formKurz; set => SetFormKurz(value); }
-        public void SetFormKurz(string value)
-        {
-            if ((_formKurz ?? string.Empty) != (value ?? string.Empty))
-            {
-                _formKurz = value;
-                _fltrRec = null; //neu Laden von Abfrage
-                _columnlist = null; //neu Laden von Abfrage
-                _keyfields = null; //neu Laden von Abfrage
-                _fltrlist = null; //neu Laden von AbfrageLoadFltrlist();
-            }
-        }
-
         private readonly GlobalService gnav;
+        private readonly ProtService prot;
 
-        public LocalService()
-        {
-            //einer ohne Parameter muss sein
-        }
+        public FLTR FltrRec { get; set; }
+        public string Abfrage { get; set; }
 
-        public LocalService(GlobalService gnav)
+        //LuDef:
+        public INavigatorLink lnav;  //Mastersource
+        public string FormKurz { get; set; }  // Lu:Fremder Pagename
+
+
+        public LookupDef()
         {
             //siehe dort - EntityFieldlist = DposUtils.GetFieldlist(typeof(TItem));
-            this.gnav = gnav;  //Minimalfeld für Benachrichtigungen
+            owner = nlOwner.ownLuDef;
         }
 
-        public LocalService(GlobalService gnav, DpeData data, string formKurz, string abfrage): this()
+        public LookupDef(GlobalService gnav, DpeData data, ProtService prot, string formKurz, string abfrage): this()
         {
-            //todo: an GNav weiterleiten
             this.gnav = gnav;  //muss sein wg Session
             this.data = data;  //muss sein wg Session
+            this.prot = prot;  //muss sein wg Session
 
-            _formKurz = formKurz;
-            _abfrage = abfrage;  //ohne SetAbfrage
-
-            //References = LoadReferences(); * auf Seite
+            FormKurz = formKurz;
+            Abfrage = abfrage;
+            LoadAbfrage();  //Columnlist usw
         }
 
-        #region Live (recordcount, ..)
 
-        private int _recordcount;
-        public int Recordcount { 
-            get { return _recordcount; }
-            set { _recordcount = value;
-                if (gnav != null) gnav.StatusChanged();
-            }
-        }
+        #region ColumnList, KeyFields, Fltrlist, References  
 
-        private string _pagetitle;
-        public string Pagetitle
+        // Record mit Columnlist, Keyfields, Fltrlist von Table FLTR[FormKurz, Abfrage] laden
+        public void LoadAbfrage()
         {
-            get { return _pagetitle; }
-            set
-            {
-                _pagetitle = value;
-                if (gnav != null) gnav.StatusChanged();
-            }
+            FltrRec = data.GetFltr(FormKurz, Abfrage);  //null wenn nicht vorhanden ist auch gut
+            Columnlist = LoadColumnlist();
+            KeyFields = LoadKeyFields();  //erst hier wg ergänzt Columnlist
+            Fltrlist = LoadFltrlist();
         }
-
-        private GlobalService.PageState? _pageState;
-        public GlobalService.PageState PageState {
-            get { _pageState ??= GlobalService.PageState.Multi; 
-                  return (GlobalService.PageState)_pageState; }
-            set => _pageState = value; 
-        }
-
-        #endregion
-
-
-
-        #region ColumnList  
 
         public ColumnList LoadColumnlist()
         {
@@ -173,7 +101,6 @@ namespace ZakDAK.Kmp
             {
                 col.Fieldname = DposUtils.AdjustFieldname(col.Fieldname, EntityFieldlist.Keys.ToList<string>());
             }
-
 
             //fehlende Entity Felder als invisible ergänzen:
             //Wenn keine Abfrage/FltrRec dann Standardbereite (width)
@@ -206,15 +133,12 @@ namespace ZakDAK.Kmp
                     };
                 }
             }
-
             return columnlist;
         }
 
-        #endregion
-
-        #region KeyFields
 
         //KeyFields von Abfrage laden und nach Columnlist.Sortorder übertragenb
+        //OrderBy setzen
         public string LoadKeyFields()
         {
             //von Abfrage laden
@@ -233,8 +157,7 @@ namespace ZakDAK.Kmp
             }
 
             //nach Columnlist.Sortorder übertragen: 
-            // beware Columnlist sonst deadlock!
-            foreach (var col in _columnlist.Columns)
+            foreach (var col in Columnlist.Columns)
             {
                 if (fields.TryGetValue(col.Fieldname, out string keyvalue))
                     col.SortOrder = keyvalue.ToLower() == "asc" ? Radzen.SortOrder.Ascending : Radzen.SortOrder.Descending;
@@ -242,12 +165,20 @@ namespace ZakDAK.Kmp
                     col.SortOrder = null;
             }
 
-            return kf;
+            //OrderBy setzen (Keyfields in Linq Syntax):
+            var order = new List<string>();
+            foreach (var col in Columnlist.Columns.Where(c => c.SortOrder != null))
+            {
+                if (col.SortOrder == SortOrder.Descending)
+                    order.Add($"{col.Fieldname} {SortOrder.Descending}");
+                else
+                    order.Add($"{col.Fieldname}");
+            }
+            OrderBy = string.Join(",", order);
+
+            return kf; //Original KMP Keyfields
         }
 
-        #endregion
-
-        #region FltrList und References
 
         public FltrList LoadFltrlist()
         {
@@ -271,29 +202,92 @@ namespace ZakDAK.Kmp
         }
 
         //SQL Where Caluse generieren: Für Radzen Query
-        private string _filter;
-        public string Filter { get => _filter; set => _filter = value; }
-        private object[] _filterParameters;
-        public object[] FilterParameters { get => _filterParameters; set => _filterParameters = value; }
+        public string Filter { get; set; }
+        public object[] FilterParameters { get; set; }
+
+        #endregion
+
+        #region LoadData und GenFilter
+
+        [Flags]
+        public enum UseFltrs
+        {
+            UseAll = 0,
+            UseFltrlist = 1,
+            UseReferences = 2
+        }
 
         public void GenFilter()
         {
-            var allFltrlist = new FltrList();
-            allFltrlist.Fltrs.AddRange(Fltrlist.Fltrs);
-            allFltrlist.Fltrs.AddRange(References.Fltrs);
+            GenFilter(UseFltrs.UseAll);
+        }
+
+        public void GenFilter(UseFltrs useFltrs)
+        {
+                var allFltrlist = new FltrList();
+            if (useFltrs == UseFltrs.UseFltrlist || useFltrs == UseFltrs.UseAll)
+                allFltrlist.Fltrs.AddRange(Fltrlist.Fltrs);
+            if (useFltrs == UseFltrs.UseReferences || useFltrs == UseFltrs.UseAll)
+                allFltrlist.Fltrs.AddRange(References.Fltrs);
             //todo: FltrList und References zusammenführen (evtl über die SqlTokens, oder später getrennt zusammenführen:Parameter? )
 
             //Fltrlist.GenSqlWhere(_filter, _filterparameter);  //schreibt nach _filter und Parameter
             //erstmal ohne Parameter:
             allFltrlist.GenSqlWhere(EntityFieldlist);  //schreibt nach SqlWhere und SqlParams
-            _filter = allFltrlist.SqlWhere;
-            _filterParameters = allFltrlist.SqlParams.Values.ToArray<object>();
+            Filter = allFltrlist.SqlWhere;
+            FilterParameters = allFltrlist.SqlParams.Values.ToArray<object>();
 
             //Generate SQL: anhand FltrList und References:
             //works _filter = "(lityp=\"B\" or lityp=\"A\") and (lort_nr=\"57\") and anl_na1 .contains(\"AGH\") and (sta=\"H\")";
             //DynamicFunctions.Like(Brand, \"%a%\")
             //_filter = "(lityp=\"B\" or lityp=\"A\") and (lort_nr=\"57\") and Like(anl_na1, \"%A_H%\" and (sta=\"H\")";
         }
+
+        public async Task LoadData(LoadDataArgs args)
+        {
+            isLoading = true;
+            await Task.Yield();
+
+            LoadAbfrage();  //von FLTR neu einlesen (Columnlist, Fltrlist,..)
+
+            //pagesize anpassen falls in GNav/LNav geändert
+            if (Paging || Virtualization)
+            {
+                //verwaltung extra
+            }
+            else
+            {
+                pagesize = gnav.MaxRecordCount;
+                if (args.Skip == 0 && args.Top != pagesize)
+                {
+                    prot?.SMessL($"Top: {args.Top} => {pagesize}");
+                    args.Top = pagesize;
+                }
+            }
+            //merken für später
+            if (string.IsNullOrEmpty(args.OrderBy))
+                args.OrderBy = OrderBy;  //von Vorgabe
+            else
+                OrderBy = args.OrderBy;
+            prot?.SMessL($"Skip: {args.Skip}, Top: {args.Top}, pagesize={pagesize}");
+
+            GenFilter(UseFltrs.UseFltrlist);  //SQL Filter und Parameters generieren. LuDef:nur Fltrlist!
+            var query = data.QueryFromLoadDataArgs(args);
+            query.Filter = Filter;
+            query.FilterParameters = FilterParameters;
+            prot?.Prot0SL($"Filter:{Filter}");
+            prot?.Prot0SL($"Filterparameter:{JsonSerializer.Serialize(query.FilterParameters)}");
+            tbl = data.EntityQuery<TItem>(query).ToList();
+            //Idee ohne Data Service: tbl = lnav.queryList();
+
+            Recordcount = data.EntityQueryCount<TItem>(query);
+            if (gnav != null) 
+                gnav.StatusChanged();
+            prot?.SMessL($"Loaded. Count: {Recordcount}");
+
+            isLoading = false;
+        }
+
 
         #endregion
 

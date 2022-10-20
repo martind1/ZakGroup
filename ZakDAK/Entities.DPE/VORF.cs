@@ -217,7 +217,7 @@ namespace ZakDAK.Entities.DPE
         public int? ZEITKAT_NR { get; set; }
         public string ZEITKAT_BEZ { get; set; }
         public string EANV_KNZ { get; set; }
-        public decimal? VFUE_NR { get; set; }
+        public short? VFUE_NR { get; set; }
         public int? HAUPT_VORF_NR { get; set; }
         public string SGD_JBERICHT_K { get; set; }
         public string CHARGENUMMER { get; set; }
