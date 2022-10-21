@@ -61,8 +61,8 @@ namespace ZakDAK.Pages
             //GNav ist hier noch null!
             //grid ist hier noch null!
             gridStyle = Fullscreen ?
-                "height: 100vh; width: 100vw; " :
-                "height: calc(100vh - 180px - 55px); width: calc(100vw - 250px);";
+                "height: calc(100vh - 75px); width: calc(100vw - 50px); " :
+                "height: calc(100vh - 170px - 75px); width: calc(100vw - 250px);";
         }
 
         protected override void OnInitialized()

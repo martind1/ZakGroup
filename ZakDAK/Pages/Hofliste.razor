@@ -110,8 +110,8 @@
                         InvalidSubmit=@OnInvalidSubmit>
         <div class="container-fluid">
             <div class="form-row">
+                <!-- linke Spalte oben: -->
                 <div class="col-md-6">
-                    <!-- linke Spalte oben: -->
                     <RadzenFieldset Text="">
                         <div class="form-row">
                             <div class="col-md-3 align-items-center d-flex">
@@ -221,15 +221,15 @@
                     </RadzenFieldset>
                 </div>
 
+                <!-- rechte Spalte: class="form-row" -->
                 <div class="col-md-6">
-                    <!-- rechte Spalte: class="form-row" -->
                     <RadzenFieldset Text="">
                         <div class="form-row">
                             <div class="col-md-3 align-items-center d-flex">
                                 <RadzenLabel Text="Fahrzeug, Brutto, Tara" />
                             </div>
                             <div class="col-md-5">
-                                <RadzenTextBox class="w-100" ReadOnly="true" Name="FAHR_KNZ" @bind-Value="editRec.fahr_knz" 
+                                <RadzenTextBox class="w-100" ReadOnly="true" Name="FAHR_KNZ" @bind-Value="editRec.fahr_knz"
                                                Style="@lnav.Columnlist["fahr_knz"].SingleStyle" />
                             </div>
                             <div class="col-md-2">
@@ -254,7 +254,6 @@
                             <div class="col-md-2">
                                 <RadzenTextBox class="w-100" ReadOnly="true" Name="ETm" @bind-Value="editRec.ETm" />
                             </div>
-                            @lnav.Columnlist["tagew"].SingleStyle
                         </div>
 
                         <div class="form-row">
@@ -303,8 +302,8 @@
                     </RadzenFieldset>
                 </div>
             </div>
+            <!-- linke Spalte unten, gesamte Breite: -->
             <div class="col-md-auto">
-                <!-- linke Spalte unten: -->
                 <RadzenFieldset Text="">
                     <div class="form-row">
                         <div class="col-md-2 align-items-center d-flex">
