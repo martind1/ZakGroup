@@ -4,10 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>22.10.21-Deploy</Version>
+    <Version>22.11.28-Felder</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <FileVersion>22.10.21</FileVersion>
-    <AssemblyVersion>22.10.21</AssemblyVersion>
+    <FileVersion>22.11.28</FileVersion>
+    <AssemblyVersion>22.11.28</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

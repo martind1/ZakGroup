@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Radzen.Blazor.Rendering;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static Microsoft.AspNetCore.Razor.Language.TagHelperMetadata;
 
 namespace ZakDAK.Pages
 {
@@ -251,11 +252,7 @@ namespace ZakDAK.Pages
             //neu laden (EntityStat geht nicht wg View ohne primary key -> haskey()
             //RunKommando((int)GlobalService.KommandoTyp.Refresh);
             var vorfEntry = Data.EntityEntry<V_LADEZETTEL>(editRec);
-            if (vorfEntry.State == EntityState.Modified)
-            {
-                vorfEntry.CurrentValues.SetValues(vorfEntry.OriginalValues);
-                vorfEntry.State = EntityState.Unchanged;
-            }
+            vorfEntry.Reload();  //26.11.22 md zeigte Canceled Daten an
         }
 
         #endregion
@@ -294,7 +291,23 @@ namespace ZakDAK.Pages
 
         public async void LoadBedienerAsync()
         {
-            Bediener = (await protectedLocalStorage.GetAsync<string>("Bediener")).Value;
+            try
+            {
+                Bediener = (await protectedLocalStorage.GetAsync<string>("Bediener")).Value;
+            }
+            catch (Exception ex1)
+            {
+                Bediener = "1:"+ex1.Message;
+                try
+                {
+                    await protectedLocalStorage.DeleteAsync("Bediener");
+                }
+                catch (Exception ex2)
+                {
+                    Bediener = "D:"+ex2.Message;
+                }
+            }
+
             StateHasChanged();
         }
 
@@ -315,6 +328,37 @@ namespace ZakDAK.Pages
         {
             Bediener = "";
             SaveBedienerAsync();
+        }
+
+        #endregion
+
+        #region Felder
+
+        /// <summary>
+        /// ergibt true wenn name in Felder enthalten ist.
+        /// FLTR.BEMERKUNG: blabla
+        ///                 Felder=VFUE;DKAT;VONR;ENTS
+        ///                 blublu
+        /// </summary>
+        /// <param name="name">Param von aswHtmlSingle</param>
+        /// <returns></returns>
+        private bool HasFeld(string name)
+        { 
+            string bemerkung = lnav.FltrRec.BEMERKUNG;
+            var bemList = bemerkung.Split(Environment.NewLine,
+                StringSplitOptions.TrimEntries |StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
+            foreach ( var bem in bemList )
+            {
+                var bems = bem.Split("=");
+                if (bems.Length >= 2 && bems[0] == "Felder")
+                {
+                    var felder = bems[1].Split(";");
+                    if (felder.Contains(name)) 
+                        return true;
+                }
+            }
+            return false;
         }
 
         #endregion

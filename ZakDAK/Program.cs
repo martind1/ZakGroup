@@ -25,6 +25,9 @@ try
     builder.Services.AddServerSideBlazor();
     builder.Services.AddSingleton<WeatherForecastService>();
 
+    //Problem IIS 21.10.22:
+    builder.Services.AddServerSideBlazor().AddCircuitOptions(option => { option.DetailedErrors = true; });
+
     //md radzen:
     builder.Services.AddScoped<DialogService>();
     builder.Services.AddScoped<NotificationService>();

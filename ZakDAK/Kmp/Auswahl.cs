@@ -31,5 +31,20 @@
             new Asws(){ Param = "A", Value = "Entsorgung" },
             new Asws(){ Param = "B", Value = "Abgänge" },
             new Asws(){ Param = "W", Value = "Intern" } };
+
+        public static readonly IEnumerable<Asws> aswHtmlSingle = new Asws[] {
+            new Asws(){ Param = "VFUE", Value = "Verfüllabschnitt" },
+            new Asws(){ Param = "DKAT", Value = "Deponiekataster" },
+            new Asws(){ Param = "PROB", Value = "Probenahme" },
+            new Asws(){ Param = "FAHR", Value = "Fahrzeug" },
+            new Asws(){ Param = "EDTM", Value = "Eingang Zeit" },
+            new Asws(){ Param = "VONR", Value = "Beleg Nr." },
+            new Asws(){ Param = "LORT", Value = "Lager" },
+            new Asws(){ Param = "KATA", Value = "Kataster" },
+            new Asws(){ Param = "CHAR", Value = "Kompost Chargennr." },
+            new Asws(){ Param = "MKEN", Value = "Materialkennung" },
+            new Asws(){ Param = "SRTE", Value = "Sorte" },
+            new Asws(){ Param = "AVV", Value = "AVV" },
+            new Asws(){ Param = "ENTS", Value = "Nachweis" } };
     }
 }
