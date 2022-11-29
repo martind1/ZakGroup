@@ -345,6 +345,8 @@ namespace ZakDAK.Pages
         private bool HasFeld(string name)
         { 
             string bemerkung = lnav.FltrRec.BEMERKUNG;
+            if (bemerkung == null)
+                return false;
             var bemList = bemerkung.Split(Environment.NewLine,
                 StringSplitOptions.TrimEntries |StringSplitOptions.RemoveEmptyEntries)
                 .ToList();

@@ -45,6 +45,9 @@
             new Asws(){ Param = "MKEN", Value = "Materialkennung" },
             new Asws(){ Param = "SRTE", Value = "Sorte" },
             new Asws(){ Param = "AVV", Value = "AVV" },
-            new Asws(){ Param = "ENTS", Value = "Nachweis" } };
+            new Asws(){ Param = "ENTS", Value = "Nachweis" },
+            new Asws(){ Param = "BEF", Value = "Beförderer" },
+            new Asws(){ Param = "ANF", Value = "Anfallstelle" },
+        };
     }
 }

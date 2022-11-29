@@ -385,6 +385,28 @@
                             </div>
                         </div>
                     }
+                    @if (HasFeld("BEF"))
+                    {
+                        <div class="form-row">
+                            <div class="col-md-2 align-items-center d-flex">
+                                <RadzenLabel Text="Beförderer" />
+                            </div>
+                            <div class="col-md-10">
+                                <RadzenTextBox class="w-100" ReadOnly="true" Name="ANL_ADRE" @bind-Value="editRec.ANL_ADRE" />
+                            </div>
+                        </div>
+                    }
+                    @if (HasFeld("ANF"))
+                    {
+                        <div class="form-row">
+                            <div class="col-md-2 align-items-center d-flex">
+                                <RadzenLabel Text="Anfallstelle" />
+                            </div>
+                            <div class="col-md-10">
+                                <RadzenTextBox class="w-100" ReadOnly="true" Name="ERZ_ADRE" @bind-Value="editRec.ERZ_ADRE" />
+                            </div>
+                        </div>
+                    }
                 </RadzenFieldset>
             </div>
         </div>
