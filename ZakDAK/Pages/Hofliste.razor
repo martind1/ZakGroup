@@ -16,6 +16,7 @@
 *@
 @layout EmptyLayout
 <style>
+    @* kein grüner Rand um Checkbox: *@
     .valid.modified:not([type=checkbox]) {
         outline-style: none;
     }
@@ -284,7 +285,7 @@
                         {
                             <div class="form-row">
                                 <div class="col-md-3 align-items-center d-flex">
-                                    <RadzenLabel Text="Lager (wohin)" />
+                                    <RadzenLabel Text="Lager" />
                                 </div>
                                 <div class="col-md-2">
                                     <RadzenTextBox class="w-100" ReadOnly="true" Name="LAGER_NR" @bind-Value="editRec.LAGER_NR" />
@@ -298,7 +299,7 @@
                         {
                             <div class="form-row">
                                 <div class="col-md-3 align-items-center d-flex">
-                                    <RadzenLabel Text="Kataster (wohin)" />
+                                    <RadzenLabel Text="Kataster" />
                                 </div>
                                 <div class="col-md-2">
                                     <RadzenTextBox class="w-100" ReadOnly="true" Name="KATASTER_NR" @bind-Value="editRec.KATASTER_NR" />
