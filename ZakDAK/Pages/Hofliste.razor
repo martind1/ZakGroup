@@ -66,14 +66,14 @@
                     TItem="V_LADEZETTEL">
         <Columns>
             <RadzenDataGridColumn TItem="V_LADEZETTEL" Context="sampleBlazorModelsSampleOrder" Filterable="false"
-                                    Sortable="false" TextAlign="TextAlign.Center" Width="120px">
+                                  Sortable="false" TextAlign="TextAlign.Center" Width="120px">
                 <Template Context="vorf">
                     <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1"
-                                    Click="@(args => EditRow(vorf))" @onclick:stopPropagation="true">
+                                  Click="@(args => EditRow(vorf))" @onclick:stopPropagation="true">
                     </RadzenButton>
                     @* Works, ist aber nicht so schön Readonly Trick für Checkbox:
-                        <RadzenCheckBox onclick="return false;" @bind-Value=vorf.cfHOFL_OK Name="chbHOFL_OK"
-                            TriState="true" TValue="bool?" />
+                <RadzenCheckBox onclick="return false;" @bind-Value=vorf.cfHOFL_OK Name="chbHOFL_OK"
+                    TriState="true" TValue="bool?" />
                     *@
                     @* primitv yber schöner: *@
                     @if (vorf.HOFL_OK == "J")
@@ -95,14 +95,32 @@
             </RadzenDataGridColumn>
             @foreach (var col in lnav.Columnlist.SortedColumns)
             {
-                <RadzenDataGridColumn TItem="V_LADEZETTEL"
-                                        Property="@col.Fieldname"
-                                        Title="@col.DisplayLabel"
-                                        Width="@col.WidthPx"
-                                        Visible="@col.IsVisible"
-                                        SortOrder="@col.SortOrder"
-                                        TextAlign="@col.RzTextAlign"
-                                        FormatString="@col.FormatString" />
+                @if (col.Fieldname == "PROBE_NR")
+                {
+                    <RadzenDataGridColumn TItem="V_LADEZETTEL"
+                                          Property="@col.Fieldname"
+                                          Title="@col.DisplayLabel"
+                                          Width="@col.WidthPx"
+                                          Visible="@col.IsVisible"
+                                          SortOrder="@col.SortOrder"
+                                          TextAlign="@col.RzTextAlign"
+                                          FormatString="@col.FormatString">
+                        <Template Context="vorf">
+                            <div style="color: red; font-weight: bold;">@vorf.PROBE_NR</div>
+                        </Template>
+                    </RadzenDataGridColumn>
+                }
+                else
+                {
+                    <RadzenDataGridColumn TItem="V_LADEZETTEL"
+                                          Property="@col.Fieldname"
+                                          Title="@col.DisplayLabel"
+                                          Width="@col.WidthPx"
+                                          Visible="@col.IsVisible"
+                                          SortOrder="@col.SortOrder"
+                                          TextAlign="@col.RzTextAlign"
+                                          FormatString="@col.FormatString" />
+                }
             }
         </Columns>
     </RadzenDataGrid>
