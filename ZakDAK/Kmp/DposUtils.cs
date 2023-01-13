@@ -4,7 +4,6 @@ using System.Collections;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using System.Reflection.Metadata;
-using ZakDAK.Entities.DPE;
 
 namespace ZakDAK.Kmp
 {

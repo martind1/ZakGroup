@@ -34,17 +34,7 @@ namespace ZakDAK.Kmp
         }
 
         private int ColCounter = 0;
-
-        
-
-        //public IList<ColumnListItem> sortedColumns {
-        //    get {
-        //        var sc = new List<ColumnListItem>();
-        //        sc.Sort (c1, c2) => c1.ColIndex.CompareTo(c2.ColIndex);
-        //        return sc;
-        //    }
-        //}
-
+       
         public ColumnList()
         {
             Columns = new List<ColumnListItem>();
