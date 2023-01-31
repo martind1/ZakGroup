@@ -15,7 +15,7 @@ namespace ZakDAK.Kmp
         public string StatusText { get; set; } = "Statustext";
         public event Action OnStatusTextChange;
         private void StatusTextChanged() => OnStatusTextChange?.Invoke();
-
+        //todo: C# Event Vorgaben
         public EventConsole console;
 
         public void ProtX(ProtFlags flags, String Text)
@@ -35,7 +35,10 @@ namespace ZakDAK.Kmp
             }
             if ((flags & ProtFlags.File) != 0)
             {
-                Log.Information(Text);
+                if ((flags & ProtFlags.Debug) != 0)
+                    Log.Debug(Text);
+                else
+                    Log.Information(Text);
             }
         }
 
@@ -87,7 +90,8 @@ namespace ZakDAK.Kmp
         Database = 8,
         WarnDlg = 16,
         ErrDlg = 32,
-        TimeStamp = 64
+        TimeStamp = 64,
+        Debug = 128
     }
     /*
        TProtModus = (prTrm,    {Ausgabe in ListBox}

@@ -46,7 +46,10 @@ namespace ZakDAK.Kmp
             propertyInfos = TEntity.GetProperties();  // BindingFlags.Public);
 
             // Formatlist laden:
-            string constFormatlist = "Formatlist";
+            // In Entity:
+            // [NotMapped]
+            // public IDictionary<string, string> Formatlist { get; private set; } = new Dictionary<string, string>() ...
+            string constFormatlist = "Formatlist"; //in Entity:
             bool hasFormatlist = propertyInfos.Where(x => x.Name == constFormatlist).FirstOrDefault() != null;
             var formatlist = new Dictionary<string, string>();
             if (hasFormatlist)

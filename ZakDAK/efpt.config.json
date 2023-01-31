@@ -27,7 +27,19 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[R_Grup]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[R_INIT]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[R_Usgr]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[R_Usrs]",
          "ObjectType": 0
       },
       {
@@ -44,8 +56,10 @@
       }
    ],
    "UiHint": "BLACKI\\SQLSVR17.depoeur",
+   "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": true,
+   "UseDateOnlyTimeOnly": false,
    "UseDbContextSplitting": false,
    "UseFluentApiOnly": true,
    "UseHandleBars": true,
@@ -53,9 +67,7 @@
    "UseInflector": false,
    "UseLegacyPluralizer": false,
    "UseManyToManyEntity": false,
-   "UseNoConstructor": false,
    "UseNoDefaultConstructor": false,
-   "UseNoNavigations": false,
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": false,

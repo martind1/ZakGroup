@@ -11,7 +11,10 @@ namespace ZakDAK.Connection.DPE
         public virtual DbSet<ASWS> ASWS_Tbl { get; set; }
         public virtual DbSet<DKAT> DKAT_Tbl { get; set; }
         public virtual DbSet<FLTR> FLTR_Tbl { get; set; }
+        public virtual DbSet<R_Grup> R_Grup_Tbl { get; set; }
         public virtual DbSet<R_INIT> R_INIT_Tbl { get; set; }
+        public virtual DbSet<R_Usgr> R_Usgr_Tbl { get; set; }
+        public virtual DbSet<R_Usrs> R_Usrs_Tbl { get; set; }
         public virtual DbSet<VFUE> VFUE_Tbl { get; set; }
         public virtual DbSet<VORF> VORF_Tbl { get; set; }
         public virtual DbSet<V_LADEZETTEL> V_LADEZETTEL_Tbl { get; set; }
@@ -144,6 +147,37 @@ namespace ZakDAK.Connection.DPE
                     .IsUnicode(false);
             });
 
+            modelBuilder.Entity<R_Grup>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.HasIndex(e => e.GRUP_ID, "R_Grup0")
+                    .IsUnique()
+                    .HasFillFactor(90);
+
+                entity.Property(e => e.BEMERKUNG).HasColumnType("text");
+
+                entity.Property(e => e.ERFASST_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.ERFASST_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.GEAENDERT_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.GEAENDERT_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.GRUP_INFORMATION)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.GRUP_NAME)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<R_INIT>(entity =>
             {
                 entity.HasKey(e => e.INIT_ID)
@@ -206,6 +240,97 @@ namespace ZakDAK.Connection.DPE
                 entity.Property(e => e.WERT)
                     .IsRequired()
                     .HasMaxLength(255)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<R_Usgr>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.HasIndex(e => e.USGR_GRUP_ID, "I_USGR_GRUP_ID")
+                    .HasFillFactor(90);
+
+                entity.HasIndex(e => e.USGR_USER_ID, "I_USGR_USER_ID")
+                    .HasFillFactor(90);
+
+                entity.HasIndex(e => e.USGR_ID, "R_Usgr0")
+                    .IsUnique()
+                    .HasFillFactor(90);
+
+                entity.HasIndex(e => new { e.USGR_USER_ID, e.USGR_GRUP_ID }, "UK_USGR")
+                    .IsUnique();
+
+                entity.Property(e => e.BEMERKUNG).HasColumnType("text");
+
+                entity.Property(e => e.ERFASST_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.ERFASST_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.GEAENDERT_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.GEAENDERT_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SO_GRUP_NAME)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.SO_USER_KENNUNG)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<R_Usrs>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.HasIndex(e => e.USER_ID, "R_Usrs0")
+                    .IsUnique()
+                    .HasFillFactor(90);
+
+                entity.Property(e => e.BEMERKUNG).HasColumnType("text");
+
+                entity.Property(e => e.ERFASST_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.ERFASST_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FLAG_PASSWORT)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.GEAENDERT_AM).HasColumnType("datetime");
+
+                entity.Property(e => e.GEAENDERT_VON)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.USER_INFORMATION)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.USER_KENNUNG)
+                    .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.USER_LANGNAME)
+                    .HasMaxLength(40)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.USER_LEVEL)
+                    .HasMaxLength(2)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.USER_PASSWORT)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.USER_TELEFON_NR)
+                    .HasMaxLength(20)
                     .IsUnicode(false);
             });
 

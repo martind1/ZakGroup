@@ -332,7 +332,7 @@ namespace ZakDAK.Pages
 
         #endregion
 
-        #region Felder
+        #region Felder (Einzelsicht)
 
         /// <summary>
         /// ergibt true wenn name in Felder enthalten ist.
@@ -361,6 +361,29 @@ namespace ZakDAK.Pages
                 }
             }
             return false;
+        }
+
+        #endregion
+
+        #region Login
+
+        string LoginUser { get; set; }
+        string LoginPassword { get; set; }
+        bool LoginError { get; set; } = false;
+
+        private void Login()
+        {
+            if (Data.Login(LoginUser, LoginPassword))
+            {
+                Bediener = LoginUser;
+                LoginError = false;
+            }
+            else
+            {
+                Bediener = string.Empty;
+                LoginError = true;
+            }
+            SaveBedienerAsync();
         }
 
         #endregion

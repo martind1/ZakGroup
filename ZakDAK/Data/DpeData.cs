@@ -8,6 +8,8 @@ using ZakDAK.Connection.DPE;
 using ZakDAK.Entities.DPE;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Query = Radzen.Query;
+using ZakDAK.Kmp;
+using Serilog;
 
 namespace ZakDAK.Data
 {
@@ -187,6 +189,50 @@ where [VORF_NR] = {vorf.vorf_nr}");
         {
             Ctx.Add<T>(entity);
             Ctx.SaveChanges();
+        }
+
+        #endregion
+
+        #region Login
+
+        public bool Login(string username, string password)
+        {
+            var result = false;
+            var Group = "ANNAHMEKONTROLLE";
+            string encryptPw = Crypt.Encrypt(password, 100);
+            //Log.Information($"Password({password})->({encryptPw})");
+            var q_usrs = new Query()
+            {
+                Filter = "USER_KENNUNG = @0 and USER_PASSWORT = @1",
+                FilterParameters = new object[] { username, encryptPw}
+            };
+            var t_usrs = (IQueryable<R_Usrs>)QueryableFromQuery(q_usrs, Ctx.R_Usrs_Tbl);
+            var usrs = t_usrs.FirstOrDefault();
+            if (usrs != null)
+            {
+                var q_grup = new Query()
+                {
+                    Filter = "GRUP_NAME = @0",
+                    FilterParameters = new object[] { Group }
+                };
+                var t_grup = (IQueryable<R_Grup>)QueryableFromQuery(q_grup, Ctx.R_Grup_Tbl);
+                var grup = t_grup.FirstOrDefault();
+                if (grup != null)
+                {
+                    var q_usgr = new Query()
+                    {
+                        Filter = "USGR_USER_ID = @0 and USGR_GRUP_ID = @1",
+                        FilterParameters = new object[] { usrs.USER_ID, grup.GRUP_ID }
+                    };
+                    var t_usgr = (IQueryable<R_Usgr>)QueryableFromQuery(q_usgr, Ctx.R_Usgr_Tbl);
+                    var usgr = t_usgr.FirstOrDefault();
+                    if (usgr != null)
+                    {
+                        result = true;
+                    }
+                }
+            }
+            return result;
         }
 
         #endregion
